@@ -55,5 +55,39 @@ pipeline {
         }
       }
     }
+
+    stage('Update Application Deployment') {
+      when {
+        allOf {
+          branch 'master'
+
+          not {
+            changeRequest()
+          }
+        }
+      }
+
+      environment {
+        DEPLOY_SERVER_CREDS = credentials('deployment_ssh_creds')
+        DEPLOY_SERVER_HOST = credentials('deployment_ssh_host')
+
+        DEPLOYMENT_DIR = '/home/dev/services/webpep'
+      }
+
+      steps {
+        echo 'Updating application deployment...'
+
+        script {
+          def remote = [:]
+          remote.name = 'deployment'
+          remote.host = DEPLOY_SERVER_HOST
+          remote.user = DEPLOY_SERVER_CREDS_USR
+          remote.password = DEPLOY_SERVER_CREDS_PSW
+          remote.allowAnyHosts = true
+
+          sshCommand remote: remote, command: "cd ${DEPLOYMENT_DIR} && docker-compose stop && docker-compose rm -f && docker-compose pull && docker-compose up -d"
+        }
+      }
+    }
   }
 }
