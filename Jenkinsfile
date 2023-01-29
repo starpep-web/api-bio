@@ -49,7 +49,7 @@ pipeline {
         echo 'Deploying docker image to registry...'
 
         script {
-          docker.withRegistry(DOCKER_REGISTRY, 'nexus_account') {
+          docker.withRegistry(DOCKER_REGISTRY, 'gitea_packages_account') {
             image.push('latest')
           }
         }
