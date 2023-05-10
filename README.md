@@ -1,4 +1,4 @@
-[![Build Status](https://ci.moonstar-x.dev/job/github-webpeptide/job/datamining-api/job/master/badge/icon)](https://ci.moonstar-x.dev/job/github-webpeptide/job/datamining-api/job/master/)
+[![Build Status](https://ci.moonstar-x.dev/job/github-webpeptide/job/python-rest-api/job/master/badge/icon)](https://ci.moonstar-x.dev/job/github-webpeptide/job/python-rest-api/job/master/)
 
 # python-rest-api
 
