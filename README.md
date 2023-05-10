@@ -1,2 +1,6 @@
-# datamining-api
-Data mining API made in Flask.
+[![Build Status](https://ci.moonstar-x.dev/job/github-webpeptide/job/datamining-api/job/master/badge/icon)](https://ci.moonstar-x.dev/job/github-webpeptide/job/datamining-api/job/master/)
+
+# python-rest-api
+
+Python REST API made with Flask. This API will handle private requests inside the application to make use of Python's
+rich library set.
