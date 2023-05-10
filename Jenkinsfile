@@ -9,7 +9,7 @@ pipeline {
   }
 
   environment {
-    DOCKER_IMAGE = 'webpep/datamining-api'
+    DOCKER_IMAGE = 'webpep/python-rest-api'
     DOCKER_REGISTRY = credentials('docker_registry')
   }
 
