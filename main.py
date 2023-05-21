@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from api.controllers import api
 from api.http.errors import handle_exception
@@ -15,5 +16,6 @@ def create_app():
 
 
 if __name__ == '__main__':
+    load_dotenv()
     app = create_app()
     app.run(debug=os.getenv('DEBUG') == 'true')
