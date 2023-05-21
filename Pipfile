@@ -12,6 +12,7 @@ http-constants = "*"
 werkzeug = "*"
 scikit-learn = "*"
 fasttext = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pylint = "*"

@@ -1,7 +1,12 @@
-.git
-.gitignore
-.github
-.idea
-Jenkinsfile
+# Ignore everything by default
+*
 
-models
+# Allow the public project files.
+!Dockerfile
+!README.md
+!Pipfile
+!Pipfile.lock
+!api
+!database
+!lib
+!main.py
