@@ -7,6 +7,4 @@
 !Pipfile
 !Pipfile.lock
 !api
-!data
-!tools
 !main.py

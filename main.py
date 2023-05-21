@@ -17,5 +17,5 @@ def create_app():
 
 if __name__ == '__main__':
     load_dotenv()
-    app = create_app()
-    app.run(debug=os.getenv('DEBUG') == 'true')
+    flask_app = create_app()
+    flask_app.run(debug=os.getenv('DEBUG') == 'true')
