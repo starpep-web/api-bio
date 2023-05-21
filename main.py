@@ -8,6 +8,7 @@ from api.http.errors import handle_exception
 def create_app():
     app = Flask(__name__)
     app.config['TRAP_HTTP_EXCEPTIONS'] = True  # Allows to handle any Exception in the error handler.
+    app.url_map.strict_slashes = False  # Allows trailing slashes at the end of the route.
 
     app.register_blueprint(api)
     app.register_error_handler(Exception, handle_exception)
