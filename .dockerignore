@@ -4,8 +4,7 @@
 # Allow the public project files.
 !Dockerfile
 !README.md
-!Pipfile
-!Pipfile.lock
+!requirements.txt
 !api
 !database
 !lib
