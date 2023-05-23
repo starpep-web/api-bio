@@ -1,14 +1,19 @@
 FROM python:3.8
 
+WORKDIR /opt/bin
+
+RUN wget https://drive5.com/downloads/usearch11.0.667_i86linux32.gz
+RUN gzip -d usearch11.0.667_i86linux32.gz && chmod +x usearch11.0.667_i86linux32
+
 WORKDIR /opt/app
 
-RUN pip install pipenv
-
-COPY Pipfile* ./
-RUN pipenv sync --system
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 RUN pip install waitress
 
 COPY . .
+
+ENV BIN_LOCATION /opt/bin
 
 EXPOSE 8080
 
