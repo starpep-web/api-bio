@@ -14,6 +14,19 @@ pipeline {
   }
 
   stages {
+    stage('Unlock Keychain (Mac Agent)') {
+      steps {
+        script {
+          def isMac = sh(script: 'uname -a', returnStdout: true).contains('Darwin')
+
+          if (isMac) {
+            def keychain_access = credentials('mac_mini_keychain')
+            sh 'security unlock-keychain -p $keychain_access'
+          }
+        }
+      }
+    }
+    
     stage('Build Docker Image') {
       when {
         allOf {
@@ -49,16 +62,8 @@ pipeline {
         echo 'Deploying docker image to registry...'
 
         script {
-          def isMac = sh(script: 'uname -a', returnStdout: true).contains('Darwin')
-          
-          if (isMac) {
-            docker.withRegistry(DOCKER_REGISTRY) {
-              image.push('latest')
-            } 
-          } else {
-            docker.withRegistry(DOCKER_REGISTRY, 'gitea_packages_account') {
-              image.push('latest')
-            } 
+          docker.withRegistry(DOCKER_REGISTRY, 'gitea_packages_account') {
+            image.push('latest')
           }
         }
       }
