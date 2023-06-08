@@ -15,13 +15,19 @@ pipeline {
 
   stages {
     stage('Unlock Keychain (Mac Agent)') {
+      environment {
+        MAC_MINI_KEYCHAIN = credentials('mac_mini_keychain')
+      }
+
       steps {
         script {
           def isMac = sh(script: 'uname -a', returnStdout: true).contains('Darwin')
 
           if (isMac) {
-            def keychain_access = credentials('mac_mini_keychain')
-            sh 'security unlock-keychain -p $keychain_access'
+            echo "Unlocking macOS keychain..."
+            sh "security unlock-keychain -p $MAC_MINI_KEYCHAIN"
+          } else {
+            echo "Current agent is not macOS, skipping..."
           }
         }
       }
