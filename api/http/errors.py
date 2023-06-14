@@ -1,6 +1,6 @@
 from typing import Tuple
 from flask import Response
-from werkzeug.exceptions import HTTPException, NotFound
+from werkzeug.exceptions import HTTPException
 from http_constants.status import HttpStatus
 from .response import ResponseBuilder
 
@@ -46,7 +46,8 @@ def handle_exception(exception: Exception):
     if isinstance(exception, BaseApiException):
         return exception.build_response()
 
-    if isinstance(exception, NotFound):
-        return ResourceNotFoundException(exception.description).build_response()
+    if isinstance(exception, HTTPException):
+        return BaseApiException(exception.description, 'The server could not handle your request.', exception.code or int(HttpStatus.INTERNAL_SERVER_ERROR)).build_response()
+
 
     return InternalServerErrorException(str(exception)).build_response()
