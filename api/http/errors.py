@@ -37,6 +37,11 @@ class ResourceNotFoundException(BaseApiException):
         BaseApiException.__init__(self, message, 'The requested resource was not found.', int(HttpStatus.NOT_FOUND))
 
 
+class BadRequestException(BaseApiException):
+    def __init__(self, message: str):
+        BaseApiException.__init__(self, message, 'The server could not understand your request.', int(HttpStatus.BAD_REQUEST))
+
+
 def handle_exception(exception: Exception):
     if isinstance(exception, BaseApiException):
         return exception.build_response()
