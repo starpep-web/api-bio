@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 from Bio.Align import substitution_matrices, PairwiseAligner
-from database.models import Peptide
+from services.database.models import Peptide
 
 
 _BLOSUM_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90')

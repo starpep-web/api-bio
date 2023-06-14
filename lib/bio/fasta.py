@@ -2,7 +2,7 @@ from typing import List, TextIO
 from io import StringIO
 from Bio import SeqIO
 from Bio.Seq import Seq
-from database.models import Peptide
+from services.database.models import Peptide
 
 
 def parse_fasta_string(fasta_string: str) -> List[SeqIO.SeqRecord]:

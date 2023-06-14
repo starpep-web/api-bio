@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from api.http.response import ResponseBuilder
 from api.http.types import MIME_TYPE_FASTA
 from api.http.errors import BadRequestException
-from database import db
+from services.database import db
 from lib.bio.fasta import parse_fasta_string, is_single_fasta_valid
 from lib.bio.alignment import AlignmentOptions
 from services.alignment.single_query import run_single_query
@@ -26,8 +26,6 @@ def search_single_query():
         options = AlignmentOptions.create_from_params(request.args.to_dict())
     except ValueError as e:
         raise BadRequestException(str(e))
-
-    print(options)
 
     # TODO: This controller should initialize an async job in another thread. Status should be saved in Redis.
     # TODO: Turn this into a generator to improve performance.

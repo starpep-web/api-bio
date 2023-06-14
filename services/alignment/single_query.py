@@ -1,6 +1,6 @@
 from typing import List
 from Bio import SeqIO
-from database.models import Peptide
+from services.database.models import Peptide
 from lib.bio.alignment import blosum_align_query, replace_atypical_aas, AlignmentOptions, AlignedPeptide
 
 
