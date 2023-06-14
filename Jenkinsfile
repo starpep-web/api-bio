@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    label 'local-agent'
+    label 'main-agents'
   }
 
   options {
@@ -14,6 +14,25 @@ pipeline {
   }
 
   stages {
+    stage('Unlock Keychain (Mac Agent)') {
+      environment {
+        MAC_MINI_KEYCHAIN = credentials('mac_mini_keychain')
+      }
+
+      steps {
+        script {
+          def isMac = sh(script: 'uname -a', returnStdout: true).contains('Darwin')
+
+          if (isMac) {
+            echo "Unlocking macOS keychain..."
+            sh "security unlock-keychain -p $MAC_MINI_KEYCHAIN"
+          } else {
+            echo "Current agent is not macOS, skipping..."
+          }
+        }
+      }
+    }
+    
     stage('Build Docker Image') {
       when {
         allOf {
