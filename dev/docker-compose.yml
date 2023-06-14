@@ -1,0 +1,21 @@
+version: "3.9"
+name: webpep-python-api-dev
+
+services:
+  db:
+    image: code.moonstar-x.dev/webpep/neo4j-db:latest
+    restart: unless-stopped
+    ports:
+      - 7687:7687
+      - 7474:7474
+    environment:
+      - TZ=America/Guayaquil
+      - NEO4J_AUTH=none
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    environment:
+      - TZ=America/Guayaquil
