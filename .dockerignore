@@ -8,4 +8,5 @@
 !api
 !database
 !lib
+!services
 !main.py
