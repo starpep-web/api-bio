@@ -48,7 +48,6 @@ def replace_atypical_aas(seq: str) -> str:
     return seq.replace('O', 'K').replace('J', 'L').replace('U', 'C')
 
 
-# TODO: Accept options
 def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database: List[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
     aligner = PairwiseAligner()
     aligner.substitution_matrix = substitution_matrix

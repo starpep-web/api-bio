@@ -1,18 +1,18 @@
 from flask import Blueprint, request
 from api.http.response import ResponseBuilder
 from api.http.types import MIME_TYPE_FASTA
-from api.http.errors import BadRequestException
-from services.database import db
+from api.http.errors import BadRequestException, ResourceNotFoundException
+from services.cache import cache
 from lib.bio.fasta import parse_fasta_string, is_single_fasta_valid
 from lib.bio.alignment import AlignmentOptions
-from services.alignment.single_query import run_single_query
+from services.alignment.single_query import SingleQueryAsyncTask
 
 
 search_controller = Blueprint('search', __name__, url_prefix='/search')
 
 
 @search_controller.route('/single-query', methods=['POST'])
-def search_single_query():
+def post_single_query_task():
     content_type = request.headers.get('Content-Type')
     if content_type != MIME_TYPE_FASTA:
         raise BadRequestException(f'Invalid request body type provided, must be {MIME_TYPE_FASTA}')
@@ -27,9 +27,19 @@ def search_single_query():
     except ValueError as e:
         raise BadRequestException(str(e))
 
-    # TODO: This controller should initialize an async job in another thread. Status should be saved in Redis.
-    # TODO: Turn this into a generator to improve performance.
-    peptides = db.peptides.get_all_peptides().as_mapped_object()
-    result = run_single_query(peptides, parsed_fasta[0], options)
+    task = SingleQueryAsyncTask(parsed_fasta[0], options)
+    task.start()
 
-    return ResponseBuilder().with_data(result).build()
+    return ResponseBuilder().with_data(task.get_init_status()).build()
+
+
+@search_controller.route('/single-query/<task_id>', methods=['GET'])
+def get_single_query_task(task_id: str):
+    cached_task = cache.search.get_task(task_id)
+
+    if cached_task is None:
+        raise ResourceNotFoundException(f'Search task {task_id} does not exist.')
+
+    # TODO: Check if valid task is indeed a single-query task.
+
+    return cached_task
