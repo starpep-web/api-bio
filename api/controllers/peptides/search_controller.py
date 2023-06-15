@@ -4,6 +4,7 @@ from api.http.types import MIME_TYPE_FASTA
 from api.http.errors import BadRequestException, ResourceNotFoundException
 from lib.bio.fasta import parse_fasta_string, is_single_fasta_valid, is_multi_fasta_valid
 from lib.bio.alignment import SingleAlignmentOptions, MultiAlignmentOptions
+from lib.utils.pagination import paginate_list
 from services.alignment.single_query import SingleQueryAsyncTask
 from services.alignment.multi_query import MultiQueryAsyncTask
 
@@ -40,7 +41,16 @@ def get_single_query_task(task_id: str):
     if cached_task is None:
         raise ResourceNotFoundException(f'Single query search task {task_id} does not exist.')
 
-    return ResponseBuilder().with_data(cached_task).build()
+    try:
+        page = request.args.get('page', type=int, default=1)
+        result = {
+            **cached_task.__dict__,
+            'data': paginate_list(cached_task.data, page, 5)
+        }
+    except Exception as e:
+        raise BadRequestException(str(e))
+
+    return ResponseBuilder().with_data(result).build()
 
 
 @search_controller.route('/multi-query', methods=['POST'])
