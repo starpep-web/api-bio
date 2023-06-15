@@ -15,6 +15,10 @@ def is_single_fasta_valid(fasta: List[SeqIO.SeqRecord]) -> bool:
     return len(fasta) == 1 and fasta[0].seq != ''
 
 
+def is_multi_fasta_valid(fasta: List[SeqIO.SeqRecord]) -> bool:
+    return all([record.seq != '' for record in fasta])
+
+
 def build_fasta_string_from_peptide(peptide: Peptide) -> str:
     record = SeqIO.SeqRecord(id=peptide.id, seq=Seq(peptide.sequence), description='')
     return SeqIO.FastaIO.as_fasta(record)
