@@ -42,4 +42,4 @@ def get_single_query_task(task_id: str):
 
     # TODO: Check if valid task is indeed a single-query task.
 
-    return cached_task
+    return ResponseBuilder().with_data(cached_task).build()

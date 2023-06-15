@@ -23,4 +23,5 @@ class SearchRedisClientService:
         self.service.redis.set(task_id, json.dumps(task_data), keepttl=True, xx=True)
 
     def get_task(self, task_id: str) -> Any:
-        return json.loads(self.service.redis.get(task_id))
+        cached = self.service.redis.get(task_id)
+        return json.loads(cached) if cached is not None else None
