@@ -32,7 +32,6 @@ class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
         cache.search.update_task(status.id, dataclasses.asdict(status))
 
     def task(self) -> None:
-        # TODO: Turn this into a generator to improve performance.
         peptides = db.peptides.get_all_peptides().as_mapped_object()
 
         fixed_query = replace_atypical_aas(self.query_record.seq)

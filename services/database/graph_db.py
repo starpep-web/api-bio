@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional, Iterable
 from py2neo import Graph
 from .query import QueryWrapper
 from .models import Peptide, FullPeptide
@@ -14,12 +14,18 @@ class PeptideDatabaseService:
     def __init__(self, service: GraphDatabaseService):
         self.service = service
 
-    def get_all_peptides(self) -> QueryWrapper[List[Peptide]]:
+    def get_all_peptides(self) -> QueryWrapper[Iterable[Peptide]]:
         query = 'MATCH (n:Peptide) RETURN ID(n) as id, n.seq as seq, SIZE(n.seq) as length ORDER BY id ASC'
 
-        def mapper(wrapper: QueryWrapper[List[Peptide]]) -> List[Peptide]:
-            data = wrapper.as_data()
-            return list(map(lambda n: Peptide.from_dict(n), data))
+        def mapper(wrapper: QueryWrapper[Iterable[Peptide]]) -> Iterable[Peptide]:
+            try:
+                cur = wrapper.cursor.next()
+
+                while cur is not None:
+                    yield Peptide.from_dict(cur)
+                    cur = wrapper.cursor.next()
+            except StopIteration:
+                return
 
         return QueryWrapper(self.service.db.query(query), mapper)
 

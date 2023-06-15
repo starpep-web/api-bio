@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
+from typing import Iterable, Optional, Dict, Any, List
 from dataclasses import dataclass
 from Bio.Align import substitution_matrices, PairwiseAligner
 from services.database.models import Peptide
@@ -48,7 +48,7 @@ def replace_atypical_aas(seq: str) -> str:
     return seq.replace('O', 'K').replace('J', 'L').replace('U', 'C')
 
 
-def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database: List[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
+def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database: Iterable[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
     aligner = PairwiseAligner()
     aligner.substitution_matrix = substitution_matrix
     aligner.mode = options.alg
@@ -71,6 +71,6 @@ def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database:
     return result
 
 
-def blosum_align_query(database: List[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
+def blosum_align_query(database: Iterable[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
     substitution_matrix = substitution_matrices.load(options.matrix)
     return _align_query_with_matrix(substitution_matrix, database, query, options)
