@@ -5,10 +5,14 @@ from Bio.Align import substitution_matrices, PairwiseAligner
 from services.database.models import Peptide
 
 
-# TODO: Revise all matrices that work.
-# TODO: Improve options validation.
 # TODO: Implement multi alignment
-_BLOSUM_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90')
+_SUPPORTED_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90', 'PAM30', 'PAM70', 'PAM250')
+_SUPPORTED_ALGORITHMS = ('global', 'local')
+
+_DEFAULT_ALGORITHM = 'local'
+_DEFAULT_MATRIX_NAME = 'BLOSUM62'
+_DEFAULT_THRESHOLD = 1.0
+_DEFAULT_MAX_QUANTITY = None
 
 
 @dataclass
@@ -24,30 +28,43 @@ class SingleAlignmentOptions:
     max_quantity: Optional[int]
 
     @staticmethod
-    def create_from_params(params: Dict[str, Any]) -> SingleAlignmentOptions:
-        alg = params.get('alg', 'local')
-        matrix = params.get('matrix', 'BLOSUM62')
-        threshold = params.get('threshold', None)
-        threshold = float(threshold) if threshold else 1.0
-        max_quantity = params.get('max_quantity', None)
-        max_quantity = int(max_quantity) if max_quantity else None
+    def _validate_alg(alg: Optional[str]) -> None:
+        if alg and alg not in _SUPPORTED_ALGORITHMS:
+            raise ValueError(f'alg must be one of: {", ".join(_SUPPORTED_ALGORITHMS)}')
 
-        if alg and alg != 'local' and alg != 'global':
-            raise ValueError('alg must be either local or global.')
+    @staticmethod
+    def _validate_matrix(matrix: Optional[str]) -> None:
+        if matrix and matrix not in _SUPPORTED_MATRIX_NAMES:
+            raise ValueError(f'matrix must be one of: {", ".join(_SUPPORTED_MATRIX_NAMES)}')
 
-        if matrix and matrix not in _BLOSUM_MATRIX_NAMES:
-            raise ValueError(f'matrix must be one of: {", ".join(_BLOSUM_MATRIX_NAMES)}')
-
-        if threshold and threshold < 0 or threshold > 1:
+    @staticmethod
+    def _validate_threshold(threshold: Optional[float]) -> None:
+        if threshold and not 0 < threshold <= 1.0:
             raise ValueError('threshold must be between 0 and 1.')
 
-        if max_quantity and max_quantity < 1:
+    @staticmethod
+    def _validate_max_quantity(max_quantity: Optional[int]) -> None:
+        if max_quantity and not max_quantity > 0:
             raise ValueError('max_quantity must be at least 1.')
+
+    @staticmethod
+    def create_from_params(params: Dict[str, Any]) -> SingleAlignmentOptions:
+        alg = params.get('alg', _DEFAULT_MATRIX_NAME)
+        matrix = params.get('matrix', _DEFAULT_MATRIX_NAME)
+        threshold = params.get('threshold', None)
+        threshold = float(threshold) if threshold else _DEFAULT_THRESHOLD
+        max_quantity = params.get('max_quantity', None)
+        max_quantity = int(max_quantity) if max_quantity else _DEFAULT_MAX_QUANTITY
+
+        SingleAlignmentOptions._validate_alg(alg)
+        SingleAlignmentOptions._validate_matrix(matrix)
+        SingleAlignmentOptions._validate_threshold(threshold)
+        SingleAlignmentOptions._validate_max_quantity(max_quantity)
 
         return SingleAlignmentOptions(alg, matrix, threshold, max_quantity)
 
 
-def replace_atypical_aas(seq: str) -> str:
+def replace_ambiguous_amino_acids(seq: str) -> str:
     return seq.replace('O', 'K').replace('J', 'L').replace('U', 'C')
 
 
@@ -60,7 +77,7 @@ def align_single_query(database: Iterable[Peptide], query: str, options: SingleA
 
     result = []
     for target in database:
-        score = aligner.score(replace_atypical_aas(target.sequence), query)
+        score = aligner.score(replace_ambiguous_amino_acids(target.sequence), query)
         score_ratio = score / float(max_score)
 
         if score_ratio >= options.threshold:

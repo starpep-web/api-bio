@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Any
 from Bio import SeqIO
 from services.database import db
 from services.cache import cache
-from lib.bio.alignment import align_single_query, replace_atypical_aas, SingleAlignmentOptions
+from lib.bio.alignment import align_single_query, replace_ambiguous_amino_acids, SingleAlignmentOptions
 from lib.asynchronous.task import AsyncTask, AsyncTaskStatus, S, E
 
 
@@ -34,7 +34,7 @@ class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
     def task(self) -> None:
         peptides = db.peptides.get_all_peptides().as_mapped_object()
 
-        fixed_query = replace_atypical_aas(self.query_record.seq)
+        fixed_query = replace_ambiguous_amino_acids(self.query_record.seq)
         self.result = align_single_query(peptides, fixed_query, self.options)
 
     def pre_run(self) -> None:
