@@ -34,3 +34,8 @@ class SingleQueryAsyncTask(AsyncTask[str]):
         parsed_result = [dataclasses.asdict(r) for r in self.result]
         cache.search.update_task(self.task_id, parsed_result)
         print(f'Finished single query alignment task {self.task_id}')
+
+    def handle_error(self, error: Exception) -> None:
+        cache.search.update_task(self.task_id, str(error))
+        print(f'Error in single query aligment task {self.task_id}')
+        print(error)

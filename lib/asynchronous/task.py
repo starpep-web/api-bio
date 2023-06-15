@@ -20,6 +20,9 @@ class AsyncTask(ABC, Thread, Generic[T]):
     def task(self) -> None:
         pass
 
+    def handle_error(self, error: Exception) -> None:
+        pass
+
     def pre_run(self) -> None:
         pass
 
@@ -27,6 +30,9 @@ class AsyncTask(ABC, Thread, Generic[T]):
         pass
 
     def run(self) -> None:
-        self.pre_run()
-        self.task()
-        self.post_run()
+        try:
+            self.pre_run()
+            self.task()
+            self.post_run()
+        except Exception as e:
+            self.handle_error(e)
