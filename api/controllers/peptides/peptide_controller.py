@@ -1,6 +1,6 @@
 from flask import Blueprint
 from api.http.response import ResponseBuilder
-from database import db
+from services.database import db
 
 
 peptide_controller = Blueprint('peptide', __name__, url_prefix='/')
