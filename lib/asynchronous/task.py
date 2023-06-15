@@ -1,24 +1,48 @@
 import uuid
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Union, Optional
 from threading import Thread
 from abc import abstractmethod, ABC
+from dataclasses import dataclass
 
 
-T = TypeVar('T')
+S = TypeVar('S')
+E = TypeVar('E', bound=Exception)
 
 
-class AsyncTask(ABC, Thread, Generic[T]):
-    def __init__(self):
+@dataclass
+class AsyncTaskStatus(Generic[S, E]):
+    id: str
+    name: str
+    loading: bool
+    success: bool
+    data: Optional[Union[S, E]]
+
+
+class AsyncTask(ABC, Thread, Generic[S, E]):
+    def __init__(self, name: str):
         super().__init__()
         self.task_id = str(uuid.uuid4())
-
-    @abstractmethod
-    def get_init_status(self) -> T:
-        pass
+        self.name = name
 
     @abstractmethod
     def task(self) -> None:
         pass
+
+    @staticmethod
+    @abstractmethod
+    def get_status(task_id: str) -> AsyncTaskStatus[S, Union[E, str]]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def update_status(status: AsyncTaskStatus[S, Union[E, str]]) -> None:
+        pass
+
+    def create_status(self, loading: bool, success: bool, data: Union[S, E, str]) -> AsyncTaskStatus[S, Union[E, str]]:
+        return AsyncTaskStatus(self.task_id, self.name, loading, success, data)
+
+    def get_init_status(self) -> AsyncTaskStatus[S, Union[E, str]]:
+        return self.create_status(True, False, None)
 
     def handle_error(self, error: Exception) -> None:
         pass

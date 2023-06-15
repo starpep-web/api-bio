@@ -2,7 +2,6 @@ from flask import Blueprint, request
 from api.http.response import ResponseBuilder
 from api.http.types import MIME_TYPE_FASTA
 from api.http.errors import BadRequestException, ResourceNotFoundException
-from services.cache import cache
 from lib.bio.fasta import parse_fasta_string, is_single_fasta_valid
 from lib.bio.alignment import AlignmentOptions
 from services.alignment.single_query import SingleQueryAsyncTask
@@ -35,11 +34,9 @@ def post_single_query_task():
 
 @search_controller.route('/single-query/<task_id>', methods=['GET'])
 def get_single_query_task(task_id: str):
-    cached_task = cache.search.get_task(task_id)
+    cached_task = SingleQueryAsyncTask.get_status(task_id)
 
     if cached_task is None:
-        raise ResourceNotFoundException(f'Search task {task_id} does not exist.')
-
-    # TODO: Check if valid task is indeed a single-query task.
+        raise ResourceNotFoundException(f'Single query search task {task_id} does not exist.')
 
     return ResponseBuilder().with_data(cached_task).build()
