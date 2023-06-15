@@ -45,7 +45,7 @@ def get_single_query_task(task_id: str):
         page = request.args.get('page', type=int, default=1)
         result = {
             **cached_task.__dict__,
-            'data': paginate_list(cached_task.data, page, 5)
+            'data': paginate_list(cached_task.data, page)
         }
     except Exception as e:
         raise BadRequestException(str(e))
@@ -82,4 +82,13 @@ def get_multi_query_task(task_id: str):
     if cached_task is None:
         raise ResourceNotFoundException(f'Multi query search task {task_id} does not exist.')
 
-    return ResponseBuilder().with_data(cached_task).build()
+    try:
+        page = request.args.get('page', type=int, default=1)
+        result = {
+            **cached_task.__dict__,
+            'data': paginate_list(cached_task.data, page)
+        }
+    except Exception as e:
+        raise BadRequestException(str(e))
+
+    return ResponseBuilder().with_data(result).build()

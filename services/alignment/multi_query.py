@@ -22,10 +22,10 @@ class MultiQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
     def get_status(task_id: str) -> Optional[AsyncTaskStatus[S, E]]:
         cached = cache.search.get_task(task_id)
 
-        if cached is not None and cached['name'] != MultiQueryAsyncTask.TASK_NAME:
+        if cached is None or cached['name'] != MultiQueryAsyncTask.TASK_NAME:
             return None
 
-        return cached
+        return AsyncTaskStatus(**cached)
 
     @staticmethod
     def update_status(status: AsyncTaskStatus[S, E]) -> None:
