@@ -3,7 +3,7 @@ from api.http.response import ResponseBuilder
 from api.http.types import MIME_TYPE_FASTA
 from api.http.errors import BadRequestException, ResourceNotFoundException
 from lib.bio.fasta import parse_fasta_string, is_single_fasta_valid
-from lib.bio.alignment import AlignmentOptions
+from lib.bio.alignment import SingleAlignmentOptions
 from services.alignment.single_query import SingleQueryAsyncTask
 
 
@@ -22,7 +22,7 @@ def post_single_query_task():
         raise BadRequestException('Request body is not valid FASTA.')
 
     try:
-        options = AlignmentOptions.create_from_params(request.args.to_dict())
+        options = SingleAlignmentOptions.create_from_params(request.args.to_dict())
     except ValueError as e:
         raise BadRequestException(str(e))
 

@@ -5,23 +5,26 @@ from Bio.Align import substitution_matrices, PairwiseAligner
 from services.database.models import Peptide
 
 
+# TODO: Revise all matrices that work.
+# TODO: Improve options validation.
+# TODO: Implement multi alignment
 _BLOSUM_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90')
 
 
 @dataclass
-class AlignedPeptide(Peptide):
+class SingleAlignedPeptide(Peptide):
     score: float
 
 
 @dataclass
-class AlignmentOptions:
+class SingleAlignmentOptions:
     alg: str
     matrix: str
     threshold: float
     max_quantity: Optional[int]
 
     @staticmethod
-    def create_from_params(params: Dict[str, Any]) -> AlignmentOptions:
+    def create_from_params(params: Dict[str, Any]) -> SingleAlignmentOptions:
         alg = params.get('alg', 'local')
         matrix = params.get('matrix', 'BLOSUM62')
         threshold = params.get('threshold', None)
@@ -41,16 +44,16 @@ class AlignmentOptions:
         if max_quantity and max_quantity < 1:
             raise ValueError('max_quantity must be at least 1.')
 
-        return AlignmentOptions(alg, matrix, threshold, max_quantity)
+        return SingleAlignmentOptions(alg, matrix, threshold, max_quantity)
 
 
 def replace_atypical_aas(seq: str) -> str:
     return seq.replace('O', 'K').replace('J', 'L').replace('U', 'C')
 
 
-def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database: Iterable[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
+def align_single_query(database: Iterable[Peptide], query: str, options: SingleAlignmentOptions) -> List[SingleAlignedPeptide]:
     aligner = PairwiseAligner()
-    aligner.substitution_matrix = substitution_matrix
+    aligner.substitution_matrix = substitution_matrices.load(options.matrix)
     aligner.mode = options.alg
 
     max_score = sum([aligner.substitution_matrix[a, a] for a in query])
@@ -61,7 +64,7 @@ def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database:
         score_ratio = score / float(max_score)
 
         if score_ratio >= options.threshold:
-            result.append(AlignedPeptide(target.id, target.sequence, target.length, score_ratio))
+            result.append(SingleAlignedPeptide(target.id, target.sequence, target.length, score_ratio))
 
     result.sort(key=lambda n: -n.score)
 
@@ -69,8 +72,3 @@ def _align_query_with_matrix(substitution_matrix: Optional[List[str]], database:
         result = result[0:options.max_quantity]
 
     return result
-
-
-def blosum_align_query(database: Iterable[Peptide], query: str, options: AlignmentOptions) -> List[AlignedPeptide]:
-    substitution_matrix = substitution_matrices.load(options.matrix)
-    return _align_query_with_matrix(substitution_matrix, database, query, options)

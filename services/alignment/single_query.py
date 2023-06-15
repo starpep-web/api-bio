@@ -3,14 +3,14 @@ from typing import List, Optional, Dict, Any
 from Bio import SeqIO
 from services.database import db
 from services.cache import cache
-from lib.bio.alignment import blosum_align_query, replace_atypical_aas, AlignmentOptions
+from lib.bio.alignment import align_single_query, replace_atypical_aas, SingleAlignmentOptions
 from lib.asynchronous.task import AsyncTask, AsyncTaskStatus, S, E
 
 
 class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
     TASK_NAME = 'single_query'
 
-    def __init__(self, query_record: SeqIO.SeqRecord, options: AlignmentOptions):
+    def __init__(self, query_record: SeqIO.SeqRecord, options: SingleAlignmentOptions):
         super().__init__(SingleQueryAsyncTask.TASK_NAME)
 
         self.query_record = query_record
@@ -35,7 +35,7 @@ class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
         peptides = db.peptides.get_all_peptides().as_mapped_object()
 
         fixed_query = replace_atypical_aas(self.query_record.seq)
-        self.result = blosum_align_query(peptides, fixed_query, self.options)
+        self.result = align_single_query(peptides, fixed_query, self.options)
 
     def pre_run(self) -> None:
         cache.search.create_task(self.task_id, dataclasses.asdict(self.get_init_status()))
