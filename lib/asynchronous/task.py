@@ -44,6 +44,9 @@ class AsyncTask(ABC, Thread, Generic[S, E]):
     def get_init_status(self) -> AsyncTaskStatus[S, Union[E, str]]:
         return self.create_status(True, False, None)
 
+    def initialize(self) -> AsyncTaskStatus[S, Union[E, str]]:
+        return self.get_init_status()
+
     def handle_error(self, error: Exception) -> None:
         pass
 
