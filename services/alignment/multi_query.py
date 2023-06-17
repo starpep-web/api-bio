@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from Bio import SeqIO
 from services.database import db
 from services.cache import cache
@@ -31,16 +31,18 @@ class MultiQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
     def update_status(status: AsyncTaskStatus[S, E]) -> None:
         cache.search.update_task(status.id, dataclasses.asdict(status))
 
+    def initialize(self) -> AsyncTaskStatus[S, Union[E, str]]:
+        cache.search.create_task(self.task_id, dataclasses.asdict(self.get_init_status()))
+        return self.get_init_status()
+
+    def pre_run(self) -> None:
+        print(f'Started multi query alignment task {self.task_id}')
+
     def task(self) -> None:
         peptides = db.peptides.get_all_peptides().as_mapped_object()
 
         fixed_queries = [replace_ambiguous_amino_acids(record.seq) for record in self.query_records]
         self.result = align_multi_query(peptides, fixed_queries, self.options)
-
-    def pre_run(self) -> None:
-        cache.search.create_task(self.task_id, dataclasses.asdict(self.get_init_status()))
-
-        print(f'Started multi query alignment task {self.task_id}')
 
     def post_run(self) -> None:
         parsed_result = [dataclasses.asdict(r) for r in self.result]

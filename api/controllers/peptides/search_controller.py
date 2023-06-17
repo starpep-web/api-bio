@@ -29,9 +29,10 @@ def post_single_query_task():
         raise BadRequestException(str(e))
 
     task = SingleQueryAsyncTask(parsed_fasta[0], options)
+    status = task.initialize()
     task.start()
 
-    return ResponseBuilder().with_data(task.get_init_status()).build()
+    return ResponseBuilder().with_data(status).build()
 
 
 @search_controller.route('/single-query/<task_id>', methods=['GET'])
@@ -70,9 +71,10 @@ def post_multi_query_task():
         raise BadRequestException(str(e))
 
     task = MultiQueryAsyncTask(parsed_fasta, options)
+    status = task.initialize()
     task.start()
 
-    return ResponseBuilder().with_data(task.get_init_status()).build()
+    return ResponseBuilder().with_data(status).build()
 
 
 @search_controller.route('/multi-query/<task_id>', methods=['GET'])
