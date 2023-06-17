@@ -41,6 +41,9 @@ def get_single_query_task(task_id: str):
     if cached_task is None:
         raise ResourceNotFoundException(f'Single query search task {task_id} does not exist.')
 
+    if cached_task.loading or not cached_task.success:
+        return ResponseBuilder().with_data(cached_task).build()
+
     try:
         page = request.args.get('page', type=int, default=1)
         result = {
@@ -81,6 +84,9 @@ def get_multi_query_task(task_id: str):
 
     if cached_task is None:
         raise ResourceNotFoundException(f'Multi query search task {task_id} does not exist.')
+
+    if cached_task.loading or not cached_task.success:
+        return ResponseBuilder().with_data(cached_task).build()
 
     try:
         page = request.args.get('page', type=int, default=1)
