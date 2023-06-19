@@ -75,7 +75,7 @@ def align_single_query(database: Iterable[Peptide], query: str, options: SingleA
     aligner.substitution_matrix = substitution_matrices.load(options.matrix)
     aligner.mode = options.alg
 
-    max_score = sum([aligner.substitution_matrix[a, a] for a in query])
+    max_score = sum([max(aligner.substitution_matrix[a]) for a in query])
 
     result = []
     for target in database:
@@ -130,7 +130,7 @@ def align_multi_query(database: Iterable[Peptide], queries: List[str], options: 
         scores_for_target = []
 
         for query in queries:
-            max_score = sum([aligner.substitution_matrix[a, a] for a in query])
+            max_score = sum([max(aligner.substitution_matrix[a]) for a in query])
             score = aligner.score(replace_ambiguous_amino_acids(target.sequence), query)
             score_ratio = round(score / float(max_score), 2)
 
