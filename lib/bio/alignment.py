@@ -3,7 +3,7 @@ from typing import Iterable, Optional, Dict, Any, List
 from dataclasses import dataclass
 from statistics import mean
 from Bio.Align import substitution_matrices, PairwiseAligner
-from services.database.models import Peptide
+from services.database.models import SearchResultPeptide
 
 
 _SUPPORTED_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90', 'PAM30', 'PAM70', 'PAM250')
@@ -22,7 +22,7 @@ def replace_ambiguous_amino_acids(seq: str) -> str:
 
 
 @dataclass
-class SingleAlignedPeptide(Peptide):
+class SingleAlignedPeptide(SearchResultPeptide):
     score: float
 
 
@@ -70,7 +70,7 @@ class SingleAlignmentOptions:
         return SingleAlignmentOptions(alg, matrix, threshold, max_quantity)
 
 
-def align_single_query(database: Iterable[Peptide], query: str, options: SingleAlignmentOptions) -> List[SingleAlignedPeptide]:
+def align_single_query(database: Iterable[SearchResultPeptide], query: str, options: SingleAlignmentOptions) -> List[SingleAlignedPeptide]:
     aligner = PairwiseAligner()
     aligner.substitution_matrix = substitution_matrices.load(options.matrix)
     aligner.mode = options.alg
@@ -83,7 +83,13 @@ def align_single_query(database: Iterable[Peptide], query: str, options: SingleA
         score_ratio = round(score / float(max_score), 2)
 
         if score_ratio >= options.threshold:
-            result.append(SingleAlignedPeptide(target.id, target.sequence, target.length, score_ratio))
+            result.append(SingleAlignedPeptide(
+                id=target.id,
+                sequence=target.sequence,
+                length=target.length,
+                attributes=target.attributes,
+                score=score_ratio
+            ))
 
     result.sort(key=lambda n: -n.score)
 
@@ -94,7 +100,7 @@ def align_single_query(database: Iterable[Peptide], query: str, options: SingleA
 
 
 @dataclass
-class MultiAlignedPeptide(Peptide):
+class MultiAlignedPeptide(SearchResultPeptide):
     score: float
     avg_score: float
     max_score: float
@@ -120,7 +126,7 @@ class MultiAlignmentOptions(SingleAlignmentOptions):
         return MultiAlignmentOptions(**single_alignment_options.__dict__, criterion=criterion)
 
 
-def align_multi_query(database: Iterable[Peptide], queries: List[str], options: MultiAlignmentOptions) -> List[MultiAlignedPeptide]:
+def align_multi_query(database: Iterable[SearchResultPeptide], queries: List[str], options: MultiAlignmentOptions) -> List[MultiAlignedPeptide]:
     aligner = PairwiseAligner()
     aligner.substitution_matrix = substitution_matrices.load(options.matrix)
     aligner.mode = options.alg
@@ -150,7 +156,16 @@ def align_multi_query(database: Iterable[Peptide], queries: List[str], options: 
             real_score = 0
 
         if real_score >= options.threshold:
-            result.append(MultiAlignedPeptide(target.id, target.sequence, target.length, real_score, score_avg, score_max, score_min))
+            result.append(MultiAlignedPeptide(
+                id=target.id,
+                sequence=target.sequence,
+                length=target.length,
+                attributes=target.attributes,
+                score=real_score,
+                avg_score=score_avg,
+                max_score=score_max,
+                min_score=score_min
+            ))
 
     result.sort(key=lambda n: -n.score)
 
