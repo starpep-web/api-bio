@@ -61,7 +61,7 @@ class SearchPeptideAttributes(Model):
     bomanIndex: float
     gaacAlphatic: float
     gaacAromatic: float
-    gaacPostiveCharge: float
+    gaacPositiveCharge: float
     gaacNegativeCharge: float
     gaacUncharge: float
 
@@ -74,7 +74,7 @@ class SearchPeptideAttributes(Model):
             bomanIndex=properties['boman_index'],
             gaacAlphatic=properties['gaac_alphatic'],
             gaacAromatic=properties['gaac_aromatic'],
-            gaacPostiveCharge=properties['gaac_postive_charge'],
+            gaacPositiveCharge=properties['gaac_positive_charge'],
             gaacNegativeCharge=properties['gaac_negative_charge'],
             gaacUncharge=properties['gaac_uncharge']
         )
