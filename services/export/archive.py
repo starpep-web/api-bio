@@ -147,8 +147,8 @@ def _make_zip_archive(source_directory: str, destination_file: str) -> None:
     shutil.make_archive(
         base_name=destination_file,
         format='zip',
-        root_dir=os.path.dirname(source_directory),
-        base_dir=os.path.basename(source_directory)
+        root_dir=source_directory,
+        base_dir='.'
     )
 
 def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm) -> None:
