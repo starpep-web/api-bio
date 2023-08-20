@@ -107,7 +107,6 @@ class _ResourceHandlers:
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             pdb_output_directory = os.path.join(output_directory, 'pdb')
             os.mkdir(pdb_output_directory)
-            print(f'Created PDB output directory: {pdb_output_directory}')
 
             source_directory = self.get_source_directory()
 
@@ -115,7 +114,7 @@ class _ResourceHandlers:
                 pdb_file = os.path.join(source_directory, f'{peptide_id}.pdb')
                 shutil.copy(pdb_file, pdb_output_directory)
 
-            print(f'Copied {len(peptide_ids)} PDB files.')
+            print(f'Created PDB output directory with {len(peptide_ids)} entries: {pdb_output_directory}')
 
     class HandlerFactory:
         @staticmethod
@@ -144,10 +143,15 @@ class _ResourceHandlers:
             raise ValueError('Invalid resource_name provided to AbstractHandlerFactory.')
 
 
-def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm) -> None:
-    if not file_name.endswith('.zip'):
-        file_name += '.zip'
+def _make_zip_archive(source_directory: str, destination_file: str) -> None:
+    shutil.make_archive(
+        base_name=destination_file,
+        format='zip',
+        root_dir=os.path.dirname(source_directory),
+        base_dir=os.path.basename(source_directory)
+    )
 
+def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm) -> None:
     exportable_resources = form.get_exportable_resources()
     if len(exportable_resources) < 1:
         raise Exception('At least one resource needs to be exported to create an archive.')
@@ -155,18 +159,26 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
     if len(peptide_ids) < 1:
         raise ValueError('At least one peptide needs to be exported.')
 
-    output_directory = os.path.join(_TMP_ARTIFACTS_ROOT, f'{file_name}.d')
-    os.mkdir(output_directory)
-    print(f'Created artifact directory: {output_directory}')
+    artifact_archive_filename = os.path.join(_TMP_ARTIFACTS_ROOT, file_name)
+    artifact_directory = os.path.join(_TMP_ARTIFACTS_ROOT, f'{file_name}.d')
+    os.mkdir(artifact_directory)
+    print(f'Created artifact directory: {artifact_directory}')
 
     try:
         for resource in exportable_resources:
             handler = _ResourceHandlers.HandlerFactory.get(resource)
-            handler.create_resource_artifact(output_directory, peptide_ids)
+            handler.create_resource_artifact(artifact_directory, peptide_ids)
 
-        # TODO: Create zip here.
+        _make_zip_archive(artifact_directory, artifact_archive_filename)
+        print(f'Created artifact archive: {artifact_archive_filename}')
     except Exception as e:
-        print(e)
+        artifact_archive_filename += '.zip'
+
+        if os.path.exists(artifact_archive_filename):
+            os.remove(artifact_archive_filename)
+            print(f'Removed artifact archive: {artifact_archive_filename}')
+
+        raise e
     finally:
-        # os.remove(output_directory)
-        print(f'Removed artifact directory: {output_directory}')
+        shutil.rmtree(artifact_directory)
+        print(f'Removed artifact directory: {artifact_directory}')

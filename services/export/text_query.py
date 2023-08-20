@@ -38,7 +38,7 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         if len(peptide_ids) < 1:
             raise ValueError('At least one peptide needs to be exported.')
 
-        create_zip_archive(f'{self.task_id}.zip', peptide_ids, self.payload.form)
+        create_zip_archive(self.task_id, peptide_ids, self.payload.form)
 
         self.result = dataclasses.asdict(SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form))
 
