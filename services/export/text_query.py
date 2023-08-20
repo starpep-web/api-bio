@@ -2,6 +2,7 @@ import dataclasses
 from typing import Dict, Any, Optional
 from services.cache import cache
 from services.export.payload import SearchExportRequestPayload, SearchExportResult
+from services.export.archive import create_zip_archive
 from services.database.models import Peptide
 from lib.utils.export import base64_to_bit_array
 from lib.asynchronous.task import AsyncTask, AsyncTaskStatus, S, E
@@ -33,6 +34,8 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
     def task(self) -> None:
         parsed_bit_array = base64_to_bit_array(self.payload.data)
         peptide_ids = [Peptide.format_id(idx) for idx, bit in enumerate(parsed_bit_array) if bit == 1]
+
+        create_zip_archive(f'{self.task_id}.zip', peptide_ids, self.payload.form)
 
         self.result = dataclasses.asdict(SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form))
 
