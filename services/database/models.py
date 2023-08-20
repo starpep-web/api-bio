@@ -26,7 +26,7 @@ class Peptide(Model):
         )
 
     @staticmethod
-    def format_id(identifier: str) -> str:
+    def format_id(identifier: int) -> str:
         return f'starPep_{identifier:05d}'
 
 
