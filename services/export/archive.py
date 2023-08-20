@@ -50,7 +50,9 @@ class _ResourceHandlers:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'metadata')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-metadata.csv')
+            _ResourceHandlers.create_resource_csv_artifact(csv_output_file, self.get_source_directory(), peptide_ids)
+            print(f'Created Metadata CSV file with {len(peptide_ids)} entries: {csv_output_file}')
 
     class FastaResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
@@ -76,21 +78,27 @@ class _ResourceHandlers:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'esm-mean')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-esm-mean.csv')
+            _ResourceHandlers.create_resource_csv_artifact(csv_output_file, self.get_source_directory(), peptide_ids)
+            print(f'Created Embeddings ESM-mean CSV file with {len(peptide_ids)} entries: {csv_output_file}')
 
     class IFeatureAacResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'ifeature-aac-20')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-ifeature-aac-20.csv')
+            _ResourceHandlers.create_resource_csv_artifact(csv_output_file, self.get_source_directory(), peptide_ids)
+            print(f'Created Embeddings iFeature-AAC CSV file with {len(peptide_ids)} entries: {csv_output_file}')
 
     class IFeatureDpcResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'ifeature-dpc-400')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-ifeature-dpc-400.csv')
+            _ResourceHandlers.create_resource_csv_artifact(csv_output_file, self.get_source_directory(), peptide_ids)
+            print(f'Created Embeddings iFeature-DPC CSV file with {len(peptide_ids)} entries: {csv_output_file}')
 
     class PdbResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
