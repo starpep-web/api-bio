@@ -52,3 +52,10 @@ class SearchExportRequestPayload:
             form=form,
             data=data
         )
+
+
+@dataclass
+class SearchExportResult:
+    peptideIds: List[str]
+    total: int
+    form: SearchExportForm
