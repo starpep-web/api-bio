@@ -8,6 +8,7 @@ from services.export.payload import SearchExportForm
 
 _ASSETS_ROOT = os.path.abspath(os.getenv('ASSETS_LOCATION'))
 _TMP_ARTIFACTS_ROOT = os.path.abspath(os.getenv('TEMP_ARTIFACTS_LOCATION'))
+_ARTIFACT_NAME_PREFIX = 'StarPep-exported'
 
 
 class _ResourceHandlers:
@@ -39,7 +40,19 @@ class _ResourceHandlers:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'fasta')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            fasta_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}.fasta')
+
+            with open(fasta_output_file, 'w') as output_file:
+                source_directory = self.get_source_directory()
+
+                for peptide_id in peptide_ids:
+                    fasta_input_file = os.path.join(source_directory, f'{peptide_id}.fasta')
+
+                    with open(fasta_input_file, 'r') as input_file:
+                        input_content = input_file.read()
+                        output_file.write(input_content)
+
+            print(f'Created FASTA file with {len(peptide_ids)} entries: {fasta_output_file}')
 
     class EsmMeanResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
@@ -121,6 +134,14 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
     os.mkdir(output_directory)
     print(f'Created artifact directory: {output_directory}')
 
-    for resource in exportable_resources:
-        handler = _ResourceHandlers.HandlerFactory.get(resource)
-        handler.create_resource_artifact(output_directory, peptide_ids)
+    try:
+        for resource in exportable_resources:
+            handler = _ResourceHandlers.HandlerFactory.get(resource)
+            handler.create_resource_artifact(output_directory, peptide_ids)
+
+        # TODO: Create zip here.
+    except Exception as e:
+        print(e)
+    finally:
+        # os.remove(output_directory)
+        print(f'Removed artifact directory: {output_directory}')
