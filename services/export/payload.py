@@ -8,13 +8,16 @@ _VALID_PAYLOAD_TYPES = ['text', 'single', 'multi']
 
 @dataclass
 class SearchExportForm:
-    attributes: bool
-    metadata: bool
-    fasta: bool
-    esmMean: bool
-    iFeatureAac: bool
-    iFeatureDpc: bool
-    pdb: bool
+    attributes: bool = False
+    metadata: bool = False
+    fasta: bool = False
+    esmMean: bool = False
+    iFeatureAac: bool = False
+    iFeatureDpc: bool = False
+    pdb: bool = False
+
+    def get_exportable_resources(self) -> List[str]:
+        return [k for k, v in self.__dict__.items() if v]
 
 
 @dataclass
@@ -41,8 +44,8 @@ class SearchExportRequestPayload:
         if not payload_type or payload_type not in _VALID_PAYLOAD_TYPES:
             raise TypeError(f'Invalid payload type, must be one of: {", ".join(_VALID_PAYLOAD_TYPES)}')
 
-        if not any(form.__dict__.values()):
-            raise TypeError('Form needs to have at least one item set to true.')
+        if len(form.get_exportable_resources()) < 1:
+            raise TypeError('Form needs to have at least one resource set to true.')
 
         if not data or not isinstance(data, str) or len(data) < 1:
             raise TypeError('Data needs to be a non-empty string.')
