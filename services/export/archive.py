@@ -114,6 +114,9 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
     if len(exportable_resources) < 1:
         raise Exception('At least one resource needs to be exported to create an archive.')
 
+    if len(peptide_ids) < 1:
+        raise ValueError('At least one peptide needs to be exported.')
+
     output_directory = os.path.join(_TMP_ARTIFACTS_ROOT, f'{file_name}.d')
     os.mkdir(output_directory)
     print(f'Created artifact directory: {output_directory}')

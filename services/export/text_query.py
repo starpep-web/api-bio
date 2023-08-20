@@ -35,6 +35,9 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         parsed_bit_array = base64_to_bit_array(self.payload.data)
         peptide_ids = [Peptide.format_id(idx) for idx, bit in enumerate(parsed_bit_array) if bit == 1]
 
+        if len(peptide_ids) < 1:
+            raise ValueError('At least one peptide needs to be exported.')
+
         create_zip_archive(f'{self.task_id}.zip', peptide_ids, self.payload.form)
 
         self.result = dataclasses.asdict(SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form))
