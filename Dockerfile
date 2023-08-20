@@ -14,6 +14,8 @@ RUN pip install waitress
 COPY . .
 
 ENV BIN_LOCATION /opt/bin
+ENV ASSETS_LOCATION=/opt/files
+ENV TEMP_ARTIFACTS_LOCATION=/tmp/files
 
 EXPOSE 8080
 
