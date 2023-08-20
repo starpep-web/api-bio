@@ -31,6 +31,13 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
     def update_status(status: AsyncTaskStatus[S, E]) -> None:
         cache.export.update_task(status.id, dataclasses.asdict(status))
 
+    def handle_archive_progress(self, completed_resource: str) -> None:
+        if self.result:
+            self.result.done.append(completed_resource)
+
+            status = self.create_status(False, True, dataclasses.asdict(self.result))
+            TextQueryExportAsyncTask.update_status(status)
+
     def task(self) -> None:
         parsed_bit_array = base64_to_bit_array(self.payload.data)
         peptide_ids = [Peptide.format_id(idx) for idx, bit in enumerate(parsed_bit_array) if bit == 1]
@@ -38,9 +45,8 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         if len(peptide_ids) < 1:
             raise ValueError('At least one peptide needs to be exported.')
 
-        create_zip_archive(self.task_id, peptide_ids, self.payload.form)
-
-        self.result = dataclasses.asdict(SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form))
+        self.result = SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form, [])
+        create_zip_archive(self.task_id, peptide_ids, self.payload.form, self.handle_archive_progress)
 
     def pre_run(self) -> None:
         cache.export.create_task(self.task_id, dataclasses.asdict(self.get_init_status()))
@@ -48,7 +54,7 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         print(f'Started text query export task {self.task_id}')
 
     def post_run(self) -> None:
-        status = self.create_status(False, True, self.result)
+        status = self.create_status(False, True, dataclasses.asdict(self.result))
         TextQueryExportAsyncTask.update_status(status)
 
         print(f'Finished text query export task {self.task_id}')

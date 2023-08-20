@@ -62,3 +62,4 @@ class SearchExportResult:
     peptideIds: List[str]
     total: int
     form: SearchExportForm
+    done: List[str]

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import shutil
-from typing import List
+from typing import List, Callable, Optional
 from abc import ABC, abstractmethod
 from services.export.payload import SearchExportForm
 
@@ -151,7 +151,7 @@ def _make_zip_archive(source_directory: str, destination_file: str) -> None:
         base_dir='.'
     )
 
-def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm) -> None:
+def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm, on_resource_complete: Optional[Callable[[str], None]]) -> None:
     exportable_resources = form.get_exportable_resources()
     if len(exportable_resources) < 1:
         raise Exception('At least one resource needs to be exported to create an archive.')
@@ -168,6 +168,9 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
         for resource in exportable_resources:
             handler = _ResourceHandlers.HandlerFactory.get(resource)
             handler.create_resource_artifact(artifact_directory, peptide_ids)
+
+            if on_resource_complete is not None:
+                on_resource_complete(resource)
 
         _make_zip_archive(artifact_directory, artifact_archive_filename)
         print(f'Created artifact archive: {artifact_archive_filename}')
