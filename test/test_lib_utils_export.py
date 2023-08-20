@@ -1,5 +1,5 @@
 import unittest
-from lib.utils.export import base64to_bit_array
+from lib.utils.export import base64_to_bit_array
 
 
 class TestBase64ToBitArray(unittest.TestCase):
@@ -9,7 +9,7 @@ class TestBase64ToBitArray(unittest.TestCase):
         """
 
         with self.assertRaises(ValueError):
-            base64to_bit_array('')
+            base64_to_bit_array('')
 
     def test_throw_if_invalid_string(self):
         """
@@ -17,14 +17,14 @@ class TestBase64ToBitArray(unittest.TestCase):
         """
 
         with self.assertRaises(ValueError):
-            base64to_bit_array('àà')
+            base64_to_bit_array('àà')
 
     def test_simple_convert_no_padding(self):
         """
         It should return an array of bits corresponding to a simple base64 string with no padding.
         """
 
-        converted = base64to_bit_array('aAaA')
+        converted = base64_to_bit_array('aAaA')
         expected = [
             0, 1, 1, 0, 1, 0, 0, 0,
             0, 0, 0, 0, 0, 1, 1, 0,
@@ -38,7 +38,7 @@ class TestBase64ToBitArray(unittest.TestCase):
         It should return an array of bits corresponding to a simple base64 string with 1 padding character.
         """
 
-        converted = base64to_bit_array('zMA=')
+        converted = base64_to_bit_array('zMA=')
         expected = [
             1, 1, 0, 0, 1, 1, 0, 0,
             1, 1, 0, 0, 0, 0, 0, 0
@@ -51,7 +51,7 @@ class TestBase64ToBitArray(unittest.TestCase):
         It should return an array of bits corresponding to a simple base64 string with 2 padding characters.
         """
 
-        converted = base64to_bit_array('aA==')
+        converted = base64_to_bit_array('aA==')
         expected = [
             0, 1, 1, 0, 1, 0, 0, 0
         ]
@@ -64,7 +64,7 @@ class TestBase64ToBitArray(unittest.TestCase):
         """
 
         base64string = '/' * 7520
-        converted = base64to_bit_array(base64string)
+        converted = base64_to_bit_array(base64string)
         expected = [1] * 45120
 
         self.assertListEqual(converted, expected)

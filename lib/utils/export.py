@@ -3,7 +3,7 @@ from base64 import b64decode
 import binascii
 
 
-def base64to_bit_array(base64string: str) -> List[int]:
+def base64_to_bit_array(base64string: str) -> List[int]:
     if not len(base64string):
         raise ValueError('Cannot convert from empty base64 string.')
 
