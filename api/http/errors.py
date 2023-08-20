@@ -42,6 +42,11 @@ class BadRequestException(BaseApiException):
         BaseApiException.__init__(self, message, 'The server could not understand your request.', int(HttpStatus.BAD_REQUEST))
 
 
+class ConflictException(BaseApiException):
+    def __init__(self, message: str):
+        BaseApiException.__init__(self, message, 'The server could not fulfill your request at this time.', int(HttpStatus.CONFLICT))
+
+
 def handle_exception(exception: Exception):
     if isinstance(exception, BaseApiException):
         return exception.build_response()

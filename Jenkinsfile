@@ -32,6 +32,23 @@ pipeline {
         }
       }
     }
+
+    stage('Run Tests') {
+      agent {
+        docker {
+          image 'python:3.9'
+          args '-u root'
+          reuseNode true
+        }
+      }
+
+      steps {
+        echo 'Running tests...'
+
+        sh 'pip install -r requirements.txt'
+        sh 'python -m unittest discover -s test'
+      }
+    }
     
     stage('Build Docker Image') {
       when {
