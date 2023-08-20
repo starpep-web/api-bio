@@ -17,7 +17,6 @@ def base64to_bit_array(base64string: str) -> List[int]:
         binary = format(byte, '08b')
         bit_array_for_byte = [1 if c == '1' else 0 for c in binary]
 
-        print(bit_array_for_byte)
         bit_array += bit_array_for_byte
 
     return bit_array
