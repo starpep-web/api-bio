@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import shutil
 from typing import List
 from abc import ABC, abstractmethod
 from services.export.payload import SearchExportForm
@@ -66,7 +67,17 @@ class _ResourceHandlers:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'pdb')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            pdb_output_directory = os.path.join(output_directory, 'pdb')
+            os.mkdir(pdb_output_directory)
+            print(f'Created PDB output directory: {pdb_output_directory}')
+
+            source_directory = self.get_source_directory()
+
+            for peptide_id in peptide_ids:
+                pdb_file = os.path.join(source_directory, f'{peptide_id}.pdb')
+                shutil.copy(pdb_file, pdb_output_directory)
+
+            print(f'Copied {len(peptide_ids)} PDB files.')
 
     class HandlerFactory:
         @staticmethod
@@ -110,4 +121,3 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
     for resource in exportable_resources:
         handler = _ResourceHandlers.HandlerFactory.get(resource)
         handler.create_resource_artifact(output_directory, peptide_ids)
-
