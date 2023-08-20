@@ -21,12 +21,29 @@ class _ResourceHandlers:
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             pass
 
+    @staticmethod
+    def create_resource_csv_artifact(output_file: str, source_directory: str, peptide_ids: List[str]) -> None:
+        with open(output_file, 'w') as output_file:
+            for index, peptide_id in enumerate(peptide_ids):
+                csv_input_file = os.path.join(source_directory, f'{peptide_id}.csv')
+
+                with open(csv_input_file, 'r') as input_file:
+                    if index == 0:
+                        input_content = input_file.read()
+                    else:
+                        input_file.readline()  # Skip the columns header since it was already added before.
+                        input_content = input_file.readline()
+
+                    output_file.write(input_content)
+
     class AttributeResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
             return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'attributes')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
-            pass
+            csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-features.csv')
+            _ResourceHandlers.create_resource_csv_artifact(csv_output_file, self.get_source_directory(), peptide_ids)
+            print(f'Created Attributes CSV file with {len(peptide_ids)} entries: {csv_output_file}')
 
     class MetadataResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
