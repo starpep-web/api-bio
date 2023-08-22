@@ -35,7 +35,7 @@ class SingleQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         if self.result:
             self.result.done.append(completed_resource)
 
-            status = self.create_status(False, True, dataclasses.asdict(self.result))
+            status = self.create_status(True, False, dataclasses.asdict(self.result))
             SingleQueryExportAsyncTask.update_status(status)
 
     def task(self) -> None:
