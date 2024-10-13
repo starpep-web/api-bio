@@ -28,6 +28,17 @@ class InternalServerException(ApiResponseException):
         )
 
 
+class ConflictException(ApiResponseException):
+    def __init__(self, message: str, code: Optional[ErrorCode] = None):
+        ApiResponseException.__init__(
+            self,
+            message,
+            'The server could not fulfill your request at this time.',
+            HttpStatus.CONFLICT,
+            code
+        )
+
+
 class ResourceNotFoundException(ApiResponseException):
     def __init__(self, message: str, code: Optional[ErrorCode] = None):
         ApiResponseException.__init__(
@@ -35,5 +46,16 @@ class ResourceNotFoundException(ApiResponseException):
             message,
             'The requested resource was not found by the server.',
             HttpStatus.NOT_FOUND,
+            code
+        )
+
+
+class BadRequestException(ApiResponseException):
+    def __init__(self, message: str, code: Optional[ErrorCode] = None):
+        ApiResponseException.__init__(
+            self,
+            message,
+            'The server could not handle your request. Please verify that your request is correct and try again.',
+            HttpStatus.BAD_REQUEST,
             code
         )

@@ -18,7 +18,7 @@ def _resolve_api_response_exception(error: Union[ErrorLike, Exception]) -> ApiRe
     if isinstance(error, ApiResponseException):
         return error
 
-    if error.to_api_response_exception is not None:
+    if hasattr(error, 'to_api_response_exception') and callable(error.to_api_response_exception):
         return error.to_api_response_exception()
 
     return InternalServerException(str(error))
