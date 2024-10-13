@@ -1,26 +1,18 @@
-from __future__ import annotations
-from typing import Dict, Any, List
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
-
-class Model(ABC):
-    @staticmethod
-    @abstractmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> Model:
-        pass
+from typing import Dict, Any, List
+from pkg.shared.services.neo4j.models import Neo4jModel
 
 
 @dataclass
-class Peptide(Model):
+class BasePeptide(Neo4jModel):
     id: str
     sequence: str
     length: int
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> Peptide:
-        return Peptide(
-            id=Peptide.format_id(properties['id']),
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'BasePeptide':
+        return BasePeptide(
+            id=BasePeptide.format_id(properties['id']),
             sequence=properties['seq'],
             length=properties['length']
         )
@@ -31,7 +23,7 @@ class Peptide(Model):
 
 
 @dataclass
-class PeptideMetadata(Model):
+class PeptideMetadata(Neo4jModel):
     assessedAgainst: List[str]
     compiledIn: List[str]
     constitutedBy: List[str]
@@ -41,7 +33,7 @@ class PeptideMetadata(Model):
     relatedTo: List[str]
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> PeptideMetadata:
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'PeptideMetadata':
         return PeptideMetadata(
             assessedAgainst=properties.get('assessed_against', []),
             compiledIn=properties.get('compiled_in', []),
@@ -54,7 +46,7 @@ class PeptideMetadata(Model):
 
 
 @dataclass
-class SearchPeptideAttributes(Model):
+class SearchPeptideAttributes(Neo4jModel):
     hydropathicity: float
     charge: int
     isoelectricPoint: float
@@ -66,7 +58,7 @@ class SearchPeptideAttributes(Model):
     gaacUncharge: float
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> SearchPeptideAttributes:
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'SearchPeptideAttributes':
         return SearchPeptideAttributes(
             hydropathicity=properties['hydropathicity'],
             charge=properties['charge'],
@@ -93,7 +85,7 @@ class FullPeptideAttributes(SearchPeptideAttributes):
     aliphaticIndex: float
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> FullPeptideAttributes:
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'FullPeptideAttributes':
         search_attributes = SearchPeptideAttributes.from_neo4j_properties(properties)
 
         return FullPeptideAttributes(
@@ -111,37 +103,37 @@ class FullPeptideAttributes(SearchPeptideAttributes):
 
 
 @dataclass
-class SearchResultPeptide(Peptide):
+class SearchPeptide(BasePeptide):
     attributes: SearchPeptideAttributes
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> SearchResultPeptide:
-        as_peptide = Peptide.from_neo4j_properties(properties)
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'SearchPeptide':
+        as_base_peptide = BasePeptide.from_neo4j_properties(properties)
         attributes = SearchPeptideAttributes.from_neo4j_properties(properties['attributes'])
 
-        return SearchResultPeptide(
-            id=as_peptide.id,
-            sequence=as_peptide.sequence,
-            length=as_peptide.length,
+        return SearchPeptide(
+            id=as_base_peptide.id,
+            sequence=as_base_peptide.sequence,
+            length=as_base_peptide.length,
             attributes=attributes
         )
 
 
 @dataclass
-class FullPeptide(Peptide):
+class Peptide(BasePeptide):
     metadata: PeptideMetadata
     attributes: FullPeptideAttributes
 
     @staticmethod
-    def from_neo4j_properties(properties: Dict[str, Any]) -> FullPeptide:
-        as_peptide = Peptide.from_neo4j_properties(properties)
+    def from_neo4j_properties(properties: Dict[str, Any]) -> 'Peptide':
+        as_base_peptide = BasePeptide.from_neo4j_properties(properties)
         metadata = PeptideMetadata.from_neo4j_properties(properties)
         attributes = FullPeptideAttributes.from_neo4j_properties(properties['attributes'])
 
-        return FullPeptide(
-            id=as_peptide.id,
-            sequence=as_peptide.sequence,
-            length=as_peptide.length,
+        return Peptide(
+            id=as_base_peptide.id,
+            sequence=as_base_peptide.sequence,
+            length=as_base_peptide.length,
             metadata=metadata,
             attributes=attributes
         )
