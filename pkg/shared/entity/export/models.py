@@ -1,4 +1,3 @@
-from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Any, List
 
@@ -36,12 +35,12 @@ class SearchExportRequestPayload:
         return self.type == 'multi'
 
     @staticmethod
-    def from_json(json: Dict[str, Any]) -> SearchExportRequestPayload:
+    def from_json(json: Dict[str, Any]) -> 'SearchExportRequestPayload':
         payload_type = json.get('type', None)
         form = SearchExportForm(**json.get('form', {}))
         data = json.get('data', None)
 
-        if not payload_type or payload_type not in _VALID_PAYLOAD_TYPES:
+        if payload_type is None or payload_type not in _VALID_PAYLOAD_TYPES:
             raise TypeError(f'Invalid payload type, must be one of: {", ".join(_VALID_PAYLOAD_TYPES)}')
 
         if len(form.get_exportable_resources()) < 1:
@@ -51,7 +50,7 @@ class SearchExportRequestPayload:
             raise TypeError('Data needs to be a non-empty string.')
 
         return SearchExportRequestPayload(
-            type=payload_type,
+            type=str(payload_type),
             form=form,
             data=data
         )

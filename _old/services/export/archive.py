@@ -151,6 +151,7 @@ def _make_zip_archive(source_directory: str, destination_file: str) -> None:
         base_dir='.'
     )
 
+
 def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExportForm, on_resource_complete: Optional[Callable[[str], None]]) -> None:
     exportable_resources = form.get_exportable_resources()
     if len(exportable_resources) < 1:
