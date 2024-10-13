@@ -6,7 +6,7 @@ class GraphDatabaseService:
     instance: 'GraphDatabaseService' = None
     
     def __init__(self):
-        self.db = Graph(config.neo4j_uri)
+        self.client = Graph(config.neo4j_uri)
     
     @staticmethod
     def get_instance() -> 'GraphDatabaseService':

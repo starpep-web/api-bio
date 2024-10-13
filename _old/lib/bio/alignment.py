@@ -6,20 +6,6 @@ from Bio.Align import substitution_matrices, PairwiseAligner
 from services.database.models import SearchResultPeptide
 
 
-_SUPPORTED_MATRIX_NAMES = ('BLOSUM45', 'BLOSUM50', 'BLOSUM62', 'BLOSUM80', 'BLOSUM90', 'PAM30', 'PAM70', 'PAM250')
-_SUPPORTED_ALGORITHMS = ('global', 'local')
-_SUPPORTED_CRITERIA = ('avg', 'max', 'min')
-
-_DEFAULT_ALGORITHM = 'local'
-_DEFAULT_MATRIX_NAME = 'BLOSUM62'
-_DEFAULT_THRESHOLD = 1.0
-_DEFAULT_MAX_QUANTITY = None
-_DEFAULT_CRITERION = 'avg'
-
-
-def replace_ambiguous_amino_acids(seq: str) -> str:
-    return seq.replace('O', 'K').replace('J', 'L').replace('U', 'C')
-
 
 @dataclass
 class SingleAlignedPeptide(SearchResultPeptide):

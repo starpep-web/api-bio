@@ -11,8 +11,3 @@ def get_peptides():
     peptides = db.peptides.get_all_peptides().as_mapped_object()
     return ResponseBuilder().with_data(list(peptides)).build()
 
-
-@peptide_controller.route('/<sequence>', methods=['GET'])
-def get_peptide_by_sequence(sequence: str):
-    peptides = db.peptides.get_full_peptide(sequence).as_mapped_object()
-    return ResponseBuilder().with_data(peptides).build()

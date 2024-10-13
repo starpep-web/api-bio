@@ -5,20 +5,20 @@ from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
 
-S = TypeVar('S')
-E = TypeVar('E', bound=Exception)
+_TData = TypeVar('_TData')
+_TException = TypeVar('_TException', bound=Exception)
 
 
 @dataclass
-class AsyncTaskStatus(Generic[S, E]):
+class AsyncTaskStatus(Generic[_TData, _TException]):
     id: str
     name: str
     loading: bool
     success: bool
-    data: Optional[Union[S, E]]
+    data: Optional[Union[_TData, _TException]]
 
 
-class AsyncTask(ABC, Thread, Generic[S, E]):
+class AsyncTask(ABC, Thread, Generic[_TData, _TException]):
     def __init__(self, name: str):
         super().__init__()
         self.task_id = str(uuid.uuid4())
@@ -30,18 +30,18 @@ class AsyncTask(ABC, Thread, Generic[S, E]):
 
     @staticmethod
     @abstractmethod
-    def get_status(task_id: str) -> AsyncTaskStatus[S, Union[E, str]]:
+    def get_status(task_id: str) -> AsyncTaskStatus[_TData, Union[_TException, str]]:
         pass
 
     @staticmethod
     @abstractmethod
-    def update_status(status: AsyncTaskStatus[S, Union[E, str]]) -> None:
+    def update_status(status: AsyncTaskStatus[_TData, Union[_TException, str]]) -> None:
         pass
 
-    def create_status(self, loading: bool, success: bool, data: Union[S, E, str]) -> AsyncTaskStatus[S, Union[E, str]]:
+    def create_status(self, loading: bool, success: bool, data: Union[_TData, _TException, str]) -> AsyncTaskStatus[_TData, Union[_TException, str]]:
         return AsyncTaskStatus(self.task_id, self.name, loading, success, data)
 
-    def get_init_status(self) -> AsyncTaskStatus[S, Union[E, str]]:
+    def get_init_status(self) -> AsyncTaskStatus[_TData, Union[_TException, str]]:
         return self.create_status(True, False, None)
 
     def handle_error(self, error: Exception) -> None:
