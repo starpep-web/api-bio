@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pkg.handlers import router, load_controllers
+from pkg.middleware.handlers import register_error_handler
 
 
 def create_app():
@@ -7,6 +8,7 @@ def create_app():
 
     load_controllers()
     app.include_router(router, prefix="")
+    register_error_handler(app)
 
     return app
 
