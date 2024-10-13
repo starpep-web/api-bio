@@ -1,13 +1,11 @@
-from __future__ import annotations
 import os
 import shutil
 from typing import List, Callable, Optional
 from abc import ABC, abstractmethod
-from services.export.payload import SearchExportForm
+from pkg.config import config
+from pkg.shared.entity.export.models import SearchExportForm
 
 
-_ASSETS_ROOT = os.path.abspath(os.getenv('ASSETS_LOCATION'))
-_TMP_ARTIFACTS_ROOT = os.path.abspath(os.getenv('TEMP_ARTIFACTS_LOCATION'))
 _ARTIFACT_NAME_PREFIX = 'StarPep-exported'
 
 
@@ -38,7 +36,7 @@ class _ResourceHandlers:
 
     class AttributeResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'attributes')
+            return os.path.join(config.assets_location, 'peptides', 'csv', 'attributes')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-features.csv')
@@ -47,7 +45,7 @@ class _ResourceHandlers:
 
     class MetadataResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'metadata')
+            return os.path.join(config.assets_location, 'peptides', 'csv', 'metadata')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-metadata.csv')
@@ -56,7 +54,7 @@ class _ResourceHandlers:
 
     class FastaResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'fasta')
+            return os.path.join(config.assets_location, 'peptides', 'fasta')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             fasta_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}.fasta')
@@ -75,7 +73,7 @@ class _ResourceHandlers:
 
     class EsmMeanResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'esm-mean')
+            return os.path.join(config.assets_location, 'peptides', 'csv', 'embeddings', 'esm-mean')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-esm-mean.csv')
@@ -84,7 +82,7 @@ class _ResourceHandlers:
 
     class IFeatureAacResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'ifeature-aac-20')
+            return os.path.join(config.assets_location, 'peptides', 'csv', 'embeddings', 'ifeature-aac-20')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-ifeature-aac-20.csv')
@@ -93,7 +91,7 @@ class _ResourceHandlers:
 
     class IFeatureDpcResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'csv', 'embeddings', 'ifeature-dpc-400')
+            return os.path.join(config.assets_location, 'peptides', 'csv', 'embeddings', 'ifeature-dpc-400')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             csv_output_file = os.path.join(output_directory, f'{_ARTIFACT_NAME_PREFIX}-embeddings-ifeature-dpc-400.csv')
@@ -102,7 +100,7 @@ class _ResourceHandlers:
 
     class PdbResourceHandler(AbstractResourceHandler):
         def get_source_directory(self) -> str:
-            return os.path.join(_ASSETS_ROOT, 'peptides', 'pdb')
+            return os.path.join(config.assets_location, 'peptides', 'pdb')
 
         def create_resource_artifact(self, output_directory: str, peptide_ids: List[str]) -> None:
             pdb_output_directory = os.path.join(output_directory, 'pdb')
@@ -118,7 +116,7 @@ class _ResourceHandlers:
 
     class HandlerFactory:
         @staticmethod
-        def get(resource_name: str) -> _ResourceHandlers.AbstractResourceHandler:
+        def get(resource_name: str) -> '_ResourceHandlers.AbstractResourceHandler':
             if resource_name == 'attributes':
                 return _ResourceHandlers.AttributeResourceHandler()
 
@@ -160,8 +158,8 @@ def create_zip_archive(file_name: str, peptide_ids: List[str], form: SearchExpor
     if len(peptide_ids) < 1:
         raise ValueError('At least one peptide needs to be exported.')
 
-    artifact_archive_filename = os.path.join(_TMP_ARTIFACTS_ROOT, file_name)
-    artifact_directory = os.path.join(_TMP_ARTIFACTS_ROOT, f'{file_name}.d')
+    artifact_archive_filename = os.path.join(config.temp_artifacts_location, file_name)
+    artifact_directory = os.path.join(config.temp_artifacts_location, f'{file_name}.d')
     os.mkdir(artifact_directory)
     print(f'Created artifact directory: {artifact_directory}')
 
