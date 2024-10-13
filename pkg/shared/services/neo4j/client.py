@@ -1,0 +1,16 @@
+from py2neo import Graph
+from pkg.config import config
+
+
+class GraphDatabaseService:
+    instance: 'GraphDatabaseService' = None
+    
+    def __init__(self):
+        self.db = Graph(config.neo4j_uri)
+    
+    @staticmethod
+    def get_instance() -> 'GraphDatabaseService':
+        if GraphDatabaseService.instance is None:
+            GraphDatabaseService.instance = GraphDatabaseService()
+            
+        return GraphDatabaseService.instance

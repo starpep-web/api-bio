@@ -4,7 +4,7 @@ from typing import TypeVar, Generic, List
 from fastapi import Request
 from pkg.shared.error.codes import ErrorCode
 from pkg.shared.helpers.http.error import BadRequestException
-
+from pkg.shared.utils.lang import safe_int
 
 _T = TypeVar("_T")
 
@@ -81,25 +81,22 @@ def create_pagination(start: int, total: int, step: int) -> Pagination:
 
 
 def resolve_pagination_request(req: Request, limit_fallback: int = _DEFAULT_LIMIT) -> PaginationRequest:
-    try:
-        min_limit = 10
-        max_limit = 100
-        default_page = 1
+    min_limit = 10
+    max_limit = 100
+    default_page = 1
 
-        page_param = req.query_params.get('page') or default_page
-        limit_param = req.query_params.get('limit') or limit_fallback
+    page_param = req.query_params.get('page') or default_page
+    limit_param = req.query_params.get('limit') or limit_fallback
 
-        page = max(int(page_param), default_page)
-        limit = min(max(int(limit_param), min_limit), max_limit)
-        start = (page - 1) * limit
+    page = max(safe_int(page_param) or default_page, default_page)
+    limit = min(max(safe_int(limit_param) or limit_fallback, min_limit), max_limit)
+    start = (page - 1) * limit
 
-        return PaginationRequest(
-            page=page,
-            start=start,
-            limit=limit
-        )
-    except Exception as e:
-        raise BadRequestException(str(e), ErrorCode.INVALID_QUERY_PROVIDED)
+    return PaginationRequest(
+        page=page,
+        start=start,
+        limit=limit
+    )
 
 
 def paginate_list(arr: List[_T], page: int, limit: int = _DEFAULT_LIMIT) -> WithPagination[_T]:

@@ -3,13 +3,6 @@ from py2neo import Graph
 from .query import QueryWrapper
 from .models import SearchResultPeptide, FullPeptide
 
-
-class GraphDatabaseService:
-    def __init__(self, uri: str):
-        self.db = Graph(uri)
-        self.peptides = PeptideDatabaseService(self)
-
-
 class PeptideDatabaseService:
     def __init__(self, service: GraphDatabaseService):
         self.service = service
