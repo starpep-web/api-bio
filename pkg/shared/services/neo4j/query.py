@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Generic, TypeVar, Callable, Dict, Any, List, Optional
 from py2neo.cypher import Cursor
 import pandas as pd
@@ -8,7 +9,7 @@ _T = TypeVar('_T')
 
 
 class QueryWrapper(Generic[_T]):
-    def __init__(self, cursor: Cursor, mapper_fn: Callable[['QueryWrapper'[_T]], _T] = None):
+    def __init__(self, cursor: Cursor, mapper_fn: Callable[[QueryWrapper[_T]], _T] = None):
         self._cursor = cursor
         self.mapper_fn = mapper_fn
 
