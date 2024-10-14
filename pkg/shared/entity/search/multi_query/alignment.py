@@ -1,39 +1,12 @@
-from __future__ import annotations
-from typing import Iterable, Optional, Dict, Any, List
-from dataclasses import dataclass
+from typing import Iterable, List
 from statistics import mean
 from Bio.Align import substitution_matrices, PairwiseAligner
-from services.database.models import SearchResultPeptide
+from pkg.shared.entity.peptide.models import SearchPeptide
+from pkg.shared.entity.search.multi_query.model import MultiAlignmentOptions, MultiAlignedPeptide
+from pkg.shared.helpers.bio.alignment import replace_ambiguous_amino_acids
 
 
-@dataclass
-class MultiAlignedPeptide(SearchResultPeptide):
-    score: float
-    avg_score: float
-    max_score: float
-    min_score: float
-
-
-@dataclass
-class MultiAlignmentOptions(SingleAlignmentOptions):
-    criterion: str
-
-    @staticmethod
-    def _validate_criterion(criterion: Optional[str]) -> None:
-        if criterion and criterion not in _SUPPORTED_CRITERIA:
-            raise ValueError(f'criterion must be one of: {", ".join(_SUPPORTED_CRITERIA)}')
-
-    @staticmethod
-    def create_from_params(params: Dict[str, Any]) -> MultiAlignmentOptions:
-        single_alignment_options = SingleAlignmentOptions.create_from_params(params)
-        criterion = params.get('criterion', _DEFAULT_CRITERION)
-
-        MultiAlignmentOptions._validate_criterion(criterion)
-
-        return MultiAlignmentOptions(**single_alignment_options.__dict__, criterion=criterion)
-
-
-def align_multi_query(database: Iterable[SearchResultPeptide], queries: List[str], options: MultiAlignmentOptions) -> List[MultiAlignedPeptide]:
+def align_multi_query(database: Iterable[SearchPeptide], queries: List[str], options: MultiAlignmentOptions) -> List[MultiAlignedPeptide]:
     aligner = PairwiseAligner()
     aligner.substitution_matrix = substitution_matrices.load(options.matrix)
     aligner.mode = options.alg
