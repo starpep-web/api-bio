@@ -22,22 +22,6 @@ def get_text_query_export_task(task_id: str):
     return ResponseBuilder().with_data(cached_task).build()
 
 
-@export_controller.route('/text-query', methods=['POST'])
-def post_text_query_export_task():
-    try:
-        request_payload = SearchExportRequestPayload.from_json(request.json)
-    except Exception as e:
-        raise BadRequestException(str(e))
-
-    if not request_payload.is_text():
-        raise BadRequestException('This endpoint only handles exporting text-query searches.')
-
-    task = TextQueryExportAsyncTask(request_payload)
-    task.start()
-
-    return ResponseBuilder().with_data(task.get_init_status()).build()
-
-
 @export_controller.route('/single-query/<task_id>', methods=['GET'])
 def get_single_query_export_task(task_id: str):
     cached_task = SingleQueryExportAsyncTask.get_status(task_id)

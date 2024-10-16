@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict, Any, List
+from typing import Any, List, Dict
+from pydantic import BaseModel, field_validator
 
 
 _VALID_PAYLOAD_TYPES = ['text', 'single', 'multi']
 
 
-@dataclass
-class SearchExportForm:
+class SearchExportForm(BaseModel):
     attributes: bool = False
     metadata: bool = False
     fasta: bool = False
@@ -19,8 +19,7 @@ class SearchExportForm:
         return [k for k, v in self.__dict__.items() if v]
 
 
-@dataclass
-class SearchExportRequestPayload:
+class SearchExportRequestPayload(BaseModel):
     type: str
     form: SearchExportForm
     data: str
@@ -34,26 +33,26 @@ class SearchExportRequestPayload:
     def is_multi_query(self) -> bool:
         return self.type == 'multi'
 
-    @staticmethod
-    def from_json(json: Dict[str, Any]) -> 'SearchExportRequestPayload':
-        payload_type = json.get('type', None)
-        form = SearchExportForm(**json.get('form', {}))
-        data = json.get('data', None)
+    @field_validator('type')
+    def _validate_type(cls, payload_type: Any) -> str:
+        if payload_type is None or not isinstance(payload_type, str) or payload_type not in _VALID_PAYLOAD_TYPES:
+            raise ValueError(f'Invalid payload type, must be one of: {", ".join(_VALID_PAYLOAD_TYPES)}')
 
-        if payload_type is None or payload_type not in _VALID_PAYLOAD_TYPES:
-            raise TypeError(f'Invalid payload type, must be one of: {", ".join(_VALID_PAYLOAD_TYPES)}')
+        return payload_type
 
-        if len(form.get_exportable_resources()) < 1:
-            raise TypeError('Form needs to have at least one resource set to true.')
+    @field_validator('form')
+    def _validate_form(cls, form: Any) -> SearchExportForm:
+        if form is None or not isinstance(form, SearchExportForm) or len(form.get_exportable_resources()) < 1:
+            raise ValueError('Form needs to have at least one resource set to true.')
 
-        if not data or not isinstance(data, str) or len(data) < 1:
-            raise TypeError('Data needs to be a non-empty string.')
+        return form
 
-        return SearchExportRequestPayload(
-            type=str(payload_type),
-            form=form,
-            data=data
-        )
+    @field_validator('data')
+    def _validate_data(cls, data: Any) -> str:
+        if data is None or not isinstance(data, str) or len(data) < 1:
+            raise ValueError('Data needs to be a non-empty string.')
+
+        return data
 
 
 @dataclass
@@ -62,3 +61,6 @@ class SearchExportResult:
     total: int
     form: SearchExportForm
     done: List[str]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'peptideIds': self.peptideIds, 'total': self.total, 'form': self.form.model_dump(), 'done': self.done}

@@ -1,8 +1,10 @@
 from typing import Protocol, Union
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 from pkg.shared.error.codes import ErrorCode
-from pkg.shared.helpers.http.error import ApiResponseException, InternalServerException, ResourceNotFoundException
+from pkg.shared.helpers.http.error import ApiResponseException, InternalServerException, ResourceNotFoundException, \
+    SchemaValidationException
 from pkg.shared.helpers.http.response import ResponseBuilder
 
 
@@ -28,6 +30,11 @@ def register_error_handler(app: FastAPI) -> None:
     @app.api_route(path='/{full_path:path}', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'])
     async def handle_catch_all(req: Request) -> None:
         raise ResourceNotFoundException('This route is not handled by the server.', ErrorCode.NOT_FOUND)
+
+    @app.exception_handler(RequestValidationError)
+    async def handle_validation_error(req: Request, error: RequestValidationError) -> None:
+        issues = [{'loc': e.get('loc'), 'message': e.get('msg')} for e in error.errors()]
+        raise SchemaValidationException('Verify your request body.', ErrorCode.INVALID_BODY_PROVIDED, issues)
 
     @app.exception_handler(Exception)
     async def handle_error(req: Request, error: Exception) -> object:

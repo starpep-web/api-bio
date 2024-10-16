@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Any
 from pkg.shared.error.codes import ErrorCode
 from pkg.shared.helpers.http.status import HttpStatus
 
@@ -59,3 +59,19 @@ class BadRequestException(ApiResponseException):
             HttpStatus.BAD_REQUEST,
             code
         )
+
+
+class SchemaValidationException(ApiResponseException):
+    def __init__(self, message: str, code: Optional[ErrorCode] = None, issues: Optional[List[Any]] = None):
+        ApiResponseException.__init__(
+            self,
+            message,
+            'The body of this request does not conform to the validation schema.',
+            HttpStatus.BAD_REQUEST,
+            code
+        )
+
+        self.issues = issues or []
+
+    def get_response_payload(self) -> object:
+        return {**super().get_response_payload(), 'issues': self.issues}
