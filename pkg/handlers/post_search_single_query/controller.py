@@ -1,6 +1,6 @@
 from fastapi import Request, Response
 from pkg.handlers import router
-from pkg.handlers.post_search_single_query.service import create_single_query_task
+from pkg.handlers.post_search_single_query.service import create_search_single_query_task
 from pkg.shared.entity.search.single_query.model import SingleAlignmentOptions
 from pkg.shared.error.codes import ErrorCode
 from pkg.shared.helpers.bio.fasta import parse_fasta_string, is_single_fasta_valid
@@ -27,7 +27,7 @@ async def post(req: Request, res: Response):
     except ValueError as e:
         raise BadRequestException(str(e), ErrorCode.INVALID_QUERY_PROVIDED)
 
-    task = create_single_query_task(parsed_fasta[0], options)
+    task = create_search_single_query_task(parsed_fasta[0], options)
     response = ResponseBuilder().with_status_code(HttpStatus.CREATED).with_data(task.get_init_status())
 
     res.status_code = response.code

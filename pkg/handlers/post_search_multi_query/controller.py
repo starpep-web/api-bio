@@ -1,6 +1,6 @@
 from fastapi import Request, Response
 from pkg.handlers import router
-from pkg.handlers.post_search_multi_query.service import create_multi_query_task
+from pkg.handlers.post_search_multi_query.service import create_search_multi_query_task
 from pkg.shared.entity.search.multi_query.model import MultiAlignmentOptions
 from pkg.shared.error.codes import ErrorCode
 from pkg.shared.helpers.bio.fasta import parse_fasta_string, is_multi_fasta_valid
@@ -27,7 +27,7 @@ async def post(req: Request, res: Response):
     except ValueError as e:
         raise BadRequestException(str(e), ErrorCode.INVALID_QUERY_PROVIDED)
 
-    task = create_multi_query_task(parsed_fasta, options)
+    task = create_search_multi_query_task(parsed_fasta, options)
     response = ResponseBuilder().with_status_code(HttpStatus.CREATED).with_data(task.get_init_status())
 
     res.status_code = response.code
