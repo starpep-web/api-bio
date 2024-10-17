@@ -22,32 +22,6 @@ def get_single_query_export_task(task_id: str):
     return ResponseBuilder().with_data(cached_task).build()
 
 
-@export_controller.route('/single-query', methods=['POST'])
-def post_single_query_export_task():
-    try:
-        request_payload = SearchExportRequestPayload.from_json(request.json)
-    except Exception as e:
-        raise BadRequestException(str(e))
-
-    if not request_payload.is_single_query():
-        raise BadRequestException('This endpoint only handles exporting single-query searches.')
-
-    cached_search_task = SingleQueryAsyncTask.get_status(request_payload.data)
-    if cached_search_task is None:
-        raise ResourceNotFoundException(f'Single query search task {request_payload.data} does not exist.')
-
-    if cached_search_task.loading:
-        raise ConflictException(f'Single query search task {request_payload.data} has not finished yet.')
-
-    if not cached_search_task.success:
-        raise BadRequestException(f'Single query search task {request_payload.data} was not successful.')
-
-    task = SingleQueryExportAsyncTask(request_payload, cached_search_task)
-    task.start()
-
-    return ResponseBuilder().with_data(task.get_init_status()).build()
-
-
 @export_controller.route('/multi-query/<task_id>', methods=['GET'])
 def get_multi_query_export_task(task_id: str):
     cached_task = MultiQueryExportAsyncTask.get_status(task_id)
