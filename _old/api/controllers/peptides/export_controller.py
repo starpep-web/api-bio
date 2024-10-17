@@ -19,29 +19,3 @@ def get_multi_query_export_task(task_id: str):
         raise ResourceNotFoundException(f'Multi query export task {task_id} does not exist.')
 
     return ResponseBuilder().with_data(cached_task).build()
-
-
-@export_controller.route('/multi-query', methods=['POST'])
-def post_multi_query_export_task():
-    try:
-        request_payload = SearchExportRequestPayload.from_json(request.json)
-    except Exception as e:
-        raise BadRequestException(str(e))
-
-    if not request_payload.is_multi_query():
-        raise BadRequestException('This endpoint only handles exporting multi-query searches.')
-
-    cached_search_task = MultiQueryAsyncTask.get_status(request_payload.data)
-    if cached_search_task is None:
-        raise ResourceNotFoundException(f'Multi query search task {request_payload.data} does not exist.')
-
-    if cached_search_task.loading:
-        raise ConflictException(f'Multi query search task {request_payload.data} has not finished yet.')
-
-    if not cached_search_task.success:
-        raise BadRequestException(f'Multi query search task {request_payload.data} was not successful.')
-
-    task = MultiQueryExportAsyncTask(request_payload, cached_search_task)
-    task.start()
-
-    return ResponseBuilder().with_data(task.get_init_status()).build()
