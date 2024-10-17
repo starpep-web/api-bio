@@ -11,17 +11,6 @@ from services.alignment.multi_query import MultiQueryAsyncTask
 
 export_controller = Blueprint('export', __name__, url_prefix='/export')
 
-
-@export_controller.route('/single-query/<task_id>', methods=['GET'])
-def get_single_query_export_task(task_id: str):
-    cached_task = SingleQueryExportAsyncTask.get_status(task_id)
-
-    if cached_task is None:
-        raise ResourceNotFoundException(f'Single query export task {task_id} does not exist.')
-
-    return ResponseBuilder().with_data(cached_task).build()
-
-
 @export_controller.route('/multi-query/<task_id>', methods=['GET'])
 def get_multi_query_export_task(task_id: str):
     cached_task = MultiQueryExportAsyncTask.get_status(task_id)
