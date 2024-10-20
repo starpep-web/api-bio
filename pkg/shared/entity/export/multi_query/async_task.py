@@ -47,7 +47,7 @@ class MultiQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
             raise ValueError('At least one peptide needs to be exported.')
 
         self.result = SearchExportResult(peptide_ids, len(peptide_ids), self.payload.form, [])
-        create_zip_archive(self.task_id, peptide_ids, self.payload.form, self.handle_archive_progress)
+        create_zip_archive(f'export-{self.task_id}', peptide_ids, self.payload.form, self.handle_archive_progress)
 
     def pre_run(self) -> None:
         cache = get_async_task_redis_client()
