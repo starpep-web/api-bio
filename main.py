@@ -1,23 +1,16 @@
-from dotenv import load_dotenv
-load_dotenv()
-
-import os
-from flask import Flask
-from api.controllers import api
-from api.http.errors import handle_exception
+from fastapi import FastAPI
+from pkg.handlers import router, load_controllers
+from pkg.middleware.handlers import register_error_handler
 
 
 def create_app():
-    app = Flask(__name__)
-    app.config['TRAP_HTTP_EXCEPTIONS'] = True  # Allows to handle any Exception in the error handler.
-    app.url_map.strict_slashes = False  # Allows trailing slashes at the end of the route.
+    app = FastAPI()
 
-    app.register_blueprint(api)
-    app.register_error_handler(Exception, handle_exception)
+    load_controllers()
+    app.include_router(router, prefix="")
+    register_error_handler(app)
 
     return app
 
 
-if __name__ == '__main__':
-    flask_app = create_app()
-    flask_app.run(debug=os.getenv('DEBUG') == 'true', host="0.0.0.0")
+fastapi_app = create_app()

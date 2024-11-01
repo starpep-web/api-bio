@@ -1,100 +1,94 @@
-[![Build Status](https://ci.moonstar-x.dev/job/github-webpeptide/job/python-rest-api/job/master/badge/icon)](https://ci.moonstar-x.dev/job/github-webpeptide/job/python-rest-api/job/master/)
+# API - Bio
 
-# python-rest-api
+This repository contains the code for the API service that communicates to the Database and exposes endpoints to interact with it alongside Bio specific alignment algorithms and search export functionality.
 
-Python REST API made with Flask. This API will handle private requests inside the application to make use of Python's
-rich library set.
+No endpoint documentation is available yet since this API is not meant to be used publicly.
+
+## Requirements
+
+In order to develop for this repository you need:
+
+* [Python 3.12](https://www.python.org) (but any `>3.12` should work fine)
+* [Docker](https://www.docker.com/products/docker-desktop/)
+* Have [env-development](https://github.com/starpep-web/env-development) running locally.
 
 ## Development
 
-### Developing Under Linux
+First, clone this repository:
 
-If you're running Linux, developing this project should be as simple as:
+```bash
+git clone https://github.com/starpep-web/api-bio
+```
 
-Creating a `venv`:
+Create an environment:
 
-```text
+```bash
 python3 -m venv ./venv
 ```
 
-Activating your `venv`:
+Load the environment:
 
-```text
+```bash
 source ./venv/bin/activate
 ```
 
-And then installing the dependencies:
+(Or, if you're on Windows, you might have to do it with:)
 
-```text
+```powershell
+.\env\Scripts\activate.ps1
+```
+
+Install the dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Finally, you can start the development server with:
+Create an `.env` file with the following contents:
 
 ```text
-python3 main.py
+REDIS_URI=redis://localhost:6379
+NEO4J_DB_URI=bolt://localhost:7687
+ASSETS_LOCATION=/path/to/files
+TEMP_ARTIFACTS_LOCATION=/path/to/artifacts
 ```
 
-This will start a development server on port 5000 accessible at http://localhost:5000
+Run the `fastapi` entrypoint:
 
-You should have the neo4j database running on your machine. You may use the [docker-compose.yml](https://github.com/WebPeptide/web-frontend/blob/master/dev/docker-compose.yml)
-file from the [web-frontend](https://github.com/WebPeptide/web-frontend) repo.
-
-You will need a `.env` file to be present in your project root. You should ask one of the developers for a copy of
-this file as it is not tracked by git.
-
-#### Native Dependencies
-
-This project includes some native binaries that need to be installed on your machine.
-
-First, pick a place where to save these binaries. You can use a folder inside this project directory as long as it
-is not tracked by git.
-
-Let's say you want to use the folder `/opt/bin`.
-
-Run the following commands to acquire the native dependencies:
-
-```text
-cd /opt/bin
-wget https://drive5.com/downloads/usearch11.0.667_i86linux32.gz
-gzip -d usearch11.0.667_i86linux32.gz && chmod +x usearch11.0.667_i86linux32
+```bash
+fastapi dev main.py
 ```
 
-### Developing Under Anything Else
+And done, the service should be reachable at `http://localhost:8000`.
 
-The reason why developing under anything else other than Linux is that one of the native dependencies that this project
-relies on will only reliably work on Linux or Windows. However, this binary does not work on any version of macOS later
-than Big Sur because this binary is 32-bit.
+## Testing
 
-The only way to circumvent this limitation is to use Docker as a remote development platform. You can easily achieve this
-in something like [PyCharm](https://www.jetbrains.com/help/pycharm/using-docker-as-a-remote-interpreter.html). For any
-other IDE you should research yourself how to code remotely on a Docker container.
+Some testing commands are available to you:
 
-In PyCharm, click on **Preferences > Project: Project-Name** and then click on the **Add Interpreter** button. In the dropdown,
-select **On Docker**. Select `Dockerfile.dev` as the Dockerfile for the interpreter and under optional add the following as
-the image tag: `webpep-dev/python-rest-api`. Click next, wait for the build stage to end and then click next again and select
-the default **System Interpreter** that shows up.
+### `pytest test`
 
-Finally, inside the run configurations, you can add the `main.py` file as a run configuration. Make sure to change the
-**Docker container settings** to publish the `5000` port.
+This command will run unit tests once.
 
-#### Installing Dependencies
+### `ptw test`
 
-If you need to install a dependency, attach a terminal into a running development container and run the `pip` commands inside.
-When running `pip freeze > requirements.txt` the `requirements.txt` file inside the project should be updated as long as the
-container was started from PyCharm since it automatically creates the relevant volumes.
-
-Restarting the development container will re-build the image and add the new dependency. The caveat of this process is that
-the development image may re-download all the dependencies (including already installed ones).
+This command will run the unit test runner in watch-mode.
 
 ## Building
 
-You can build this application to generate a Docker image.
+If you're developing this on your local machine, consider building the Docker image with the following command:
 
-To do so, run the following command:
-
-```text
-docker build -t webpep/python-rest-api .
+```bash
+docker build -t local-starpep/api-bio:latest .
 ```
 
-This will create a `webpep/python-rest-api` Docker image in your local machine.
+You can create a new container to try it out with the following command:
+
+```bash
+docker run -it --rm -p 8000:8000 -e REDIS_URI=redis://localhost:6379 -e NEO4J_DB_URI=bolt://localhost:7687 -e ASSETS_LOCATION=/path/to/files -e TEMP_ARTIFACTS_LOCATION=/path/to/artifacts local-starpep/api-bio:latest
+```
+
+And done, the service should be reachable at `http://localhost:8000`.
+
+## Production
+
+Consider checking this [docker-compose.yml](https://github.com/starpep-web/env-production/blob/main/docker-compose.yml) for an example on how to run this image in production.

@@ -1,22 +1,19 @@
-FROM python:3.8
+FROM python:3.12-alpine
 
-WORKDIR /opt/bin
+RUN apk add --update --no-cache gcc libc-dev
 
-RUN wget https://drive5.com/downloads/usearch11.0.667_i86linux32.gz
-RUN gzip -d usearch11.0.667_i86linux32.gz && chmod +x usearch11.0.667_i86linux32
-
+RUN adduser -D starpep-api-bio
 WORKDIR /opt/app
 
-COPY requirements.txt ./
+ENV ASSETS_LOCATION=/opt/files
+ENV TEMP_ARTIFACTS_LOCATION=/tmp/files
+
+COPY --chown=starpep-api-bio requirements.txt ./
 RUN pip install -r requirements.txt
-RUN pip install waitress
 
-COPY . .
+COPY --chown=starpep-api-bio . .
 
-ENV BIN_LOCATION /opt/bin
-ENV ASSETS_LOCATION /opt/files
-ENV TEMP_ARTIFACTS_LOCATION /tmp/files
+EXPOSE 8000
 
-EXPOSE 8080
-
-CMD ["waitress-serve", "--call", "main:create_app"]
+USER starpep-api-bio
+CMD ["fastapi", "run", "main.py", "--port", "8000", "--proxy-headers"]
