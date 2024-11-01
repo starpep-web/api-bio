@@ -1,0 +1,10 @@
+# Ignore everything by default.
+*
+
+# Manually add what to use.
+!pkg
+!Dockerfile
+!LICENSE
+!main.py
+!README.md
+!requirements.txt
