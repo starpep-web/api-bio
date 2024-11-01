@@ -1,4 +1,4 @@
-import pkg.utils.export as module
+import pkg.shared.utils.export as module
 import pytest
 
 
