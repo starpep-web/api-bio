@@ -21,3 +21,14 @@ jobs:
       image_tag: latest
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: Trigger Deployment
+    uses: ./.github/workflows/callable-deploy.yml
+    needs:
+      - build
+    with:
+      repo: ${{ vars.DEPLOYMENT_REPO }}
+      message: Deployed from ${{ github.repository }} by ${{ github.actor }}
+    secrets:
+      token: ${{ secrets.REPO_DISPATCH_TOKEN }}

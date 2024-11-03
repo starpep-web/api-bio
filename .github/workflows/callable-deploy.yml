@@ -1,0 +1,28 @@
+name: Trigger Deployment
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+    secrets:
+      token:
+        required: true
+
+jobs:
+  deploy:
+    name: Trigger Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch Deployment
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repo }}
+          event-type: deploy
+          client-payload: '{"message": "${{ inputs.message }}"}'
