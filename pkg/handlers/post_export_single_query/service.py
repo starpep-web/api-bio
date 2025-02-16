@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 from pkg.shared.entity.export.models import SearchExportRequestPayload
 from pkg.shared.entity.export.single_query.async_task import SingleQueryExportAsyncTask
 from pkg.shared.entity.search.single_query.async_task import SingleQueryAsyncTask
@@ -7,7 +7,7 @@ from pkg.shared.helpers.http.error import ResourceNotFoundException, ConflictExc
 from pkg.shared.utils.async_task import AsyncTaskStatus
 
 
-def get_export_single_query_task_status(task_id: str) -> AsyncTaskStatus[List[SingleAlignedPeptide], Exception]:
+def get_export_single_query_task_status(task_id: str) -> AsyncTaskStatus[Any, List[SingleAlignedPeptide], Exception]:
     cached_search_task = SingleQueryAsyncTask.get_status(task_id)
     if cached_search_task is None:
         raise ResourceNotFoundException(f'Single query search task {task_id} does not exist.')
@@ -21,7 +21,7 @@ def get_export_single_query_task_status(task_id: str) -> AsyncTaskStatus[List[Si
     return cached_search_task
 
 
-def create_export_single_query_task(payload: SearchExportRequestPayload, cached_task_status: AsyncTaskStatus[List[SingleAlignedPeptide], Exception]) -> SingleQueryExportAsyncTask:
+def create_export_single_query_task(payload: SearchExportRequestPayload, cached_task_status: AsyncTaskStatus[Any, List[SingleAlignedPeptide], Exception]) -> SingleQueryExportAsyncTask:
     task = SingleQueryExportAsyncTask(payload, cached_task_status)
     task.start()
 

@@ -27,7 +27,7 @@ async def post(req: Request, res: Response):
     except ValueError as e:
         raise BadRequestException(str(e), ErrorCode.INVALID_QUERY_PROVIDED)
 
-    task = create_search_single_query_task(parsed_fasta[0], options)
+    task = create_search_single_query_task(parsed_fasta[0], str(parsed_fasta[0].seq), options)
     response = ResponseBuilder().with_status_code(HttpStatus.CREATED).with_data(task.get_init_status())
 
     res.status_code = response.code

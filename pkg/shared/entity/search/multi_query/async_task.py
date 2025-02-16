@@ -9,13 +9,18 @@ from pkg.shared.entity.search.multi_query.model import MultiAlignmentOptions
 from pkg.shared.utils.async_task import AsyncTask, AsyncTaskStatus
 
 
-class MultiQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
+_TContext = Dict[str, Any]
+_TData = List[Dict[str, Any]]
+
+
+class MultiQueryAsyncTask(AsyncTask[_TContext, _TData, Exception]):
     TASK_NAME = 'multi_query'
 
-    def __init__(self, query_records: List[SeqIO.SeqRecord], options: MultiAlignmentOptions):
+    def __init__(self, query_records: List[SeqIO.SeqRecord], query: str, options: MultiAlignmentOptions):
         super().__init__(MultiQueryAsyncTask.TASK_NAME)
 
         self.query_records = query_records
+        self.query = query
         self.options = options
 
         self.result = None
@@ -49,14 +54,17 @@ class MultiQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
 
     def post_run(self) -> None:
         parsed_result = [dataclasses.asdict(r) for r in self.result]
-        status = self.create_status(False, True, parsed_result)
+        status = self.create_status(False, True, self._get_context(), parsed_result)
         MultiQueryAsyncTask.update_status(status)
 
         print(f'Finished multi query alignment task {self.task_id}')
 
     def handle_error(self, error: Exception) -> None:
-        status = self.create_status(False, False, str(error))
+        status = self.create_status(False, False, self._get_context(), str(error))
         MultiQueryAsyncTask.update_status(status)
 
         print(f'Error in multi query alignment task {self.task_id}')
         print(error)
+
+    def _get_context(self) -> dict:
+        return {'query': self.query, **dataclasses.asdict(self.options)}

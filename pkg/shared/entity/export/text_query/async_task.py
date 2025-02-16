@@ -8,7 +8,11 @@ from pkg.shared.utils.async_task import AsyncTask, AsyncTaskStatus
 from pkg.shared.utils.export import base64_to_bit_array
 
 
-class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
+_TContext = None
+_TData = Dict[str, Any]
+
+
+class TextQueryExportAsyncTask(AsyncTask[_TContext, _TData, Exception]):
     TASK_NAME = 'export_text_query'
 
     def __init__(self, payload: SearchExportRequestPayload):
@@ -57,13 +61,13 @@ class TextQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         print(f'Started text query export task {self.task_id}')
 
     def post_run(self) -> None:
-        status = self.create_status(False, True, self.result.to_dict())
+        status = self.create_status(False, True, None, self.result.to_dict())
         TextQueryExportAsyncTask.update_status(status)
 
         print(f'Finished text query export task {self.task_id}')
 
     def handle_error(self, error: Exception) -> None:
-        status = self.create_status(False, False, str(error))
+        status = self.create_status(False, False, None, str(error))
         TextQueryExportAsyncTask.update_status(status)
 
         print(f'Error in text query export task {self.task_id}')
