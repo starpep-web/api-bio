@@ -7,10 +7,14 @@ from pkg.shared.entity.search.multi_query.model import MultiAlignedPeptide
 from pkg.shared.utils.async_task import AsyncTask, AsyncTaskStatus
 
 
-class MultiQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
+_TContext = None
+_TData = Dict[str, Any]
+
+
+class MultiQueryExportAsyncTask(AsyncTask[_TContext, _TData, Exception]):
     TASK_NAME = 'export_multi_query'
 
-    def __init__(self, payload: SearchExportRequestPayload, search_task: AsyncTaskStatus[List[MultiAlignedPeptide], Exception]):
+    def __init__(self, payload: SearchExportRequestPayload, search_task: AsyncTaskStatus[Any, List[MultiAlignedPeptide], Exception]):
         super().__init__(MultiQueryExportAsyncTask.TASK_NAME)
 
         self.payload = payload
@@ -56,13 +60,13 @@ class MultiQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         print(f'Started multi query export task {self.task_id}')
 
     def post_run(self) -> None:
-        status = self.create_status(False, True, self.result.to_dict())
+        status = self.create_status(False, True, None, self.result.to_dict())
         MultiQueryExportAsyncTask.update_status(status)
 
         print(f'Finished multi query export task {self.task_id}')
 
     def handle_error(self, error: Exception) -> None:
-        status = self.create_status(False, False, str(error))
+        status = self.create_status(False, False, None, str(error))
         MultiQueryExportAsyncTask.update_status(status)
 
         print(f'Error in multi query export task {self.task_id}')

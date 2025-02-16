@@ -7,10 +7,14 @@ from pkg.shared.entity.search.single_query.model import SingleAlignedPeptide
 from pkg.shared.utils.async_task import AsyncTask, AsyncTaskStatus
 
 
-class SingleQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
+_TContext = None
+_TData = Dict[str, Any]
+
+
+class SingleQueryExportAsyncTask(AsyncTask[_TContext, _TData, Exception]):
     TASK_NAME = 'export_single_query'
 
-    def __init__(self, payload: SearchExportRequestPayload, search_task: AsyncTaskStatus[List[SingleAlignedPeptide], Exception]):
+    def __init__(self, payload: SearchExportRequestPayload, search_task: AsyncTaskStatus[Any, List[SingleAlignedPeptide], Exception]):
         super().__init__(SingleQueryExportAsyncTask.TASK_NAME)
 
         self.payload = payload
@@ -56,13 +60,13 @@ class SingleQueryExportAsyncTask(AsyncTask[Dict[str, Any], Exception]):
         print(f'Started single query export task {self.task_id}')
 
     def post_run(self) -> None:
-        status = self.create_status(False, True, self.result.to_dict())
+        status = self.create_status(False, True, None, self.result.to_dict())
         SingleQueryExportAsyncTask.update_status(status)
 
         print(f'Finished single query export task {self.task_id}')
 
     def handle_error(self, error: Exception) -> None:
-        status = self.create_status(False, False, str(error))
+        status = self.create_status(False, False, None, str(error))
         SingleQueryExportAsyncTask.update_status(status)
 
         print(f'Error in single query export task {self.task_id}')

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 from pkg.shared.entity.export.models import SearchExportRequestPayload
 from pkg.shared.entity.export.multi_query.async_task import MultiQueryExportAsyncTask
 from pkg.shared.entity.search.multi_query.async_task import MultiQueryAsyncTask
@@ -7,7 +7,7 @@ from pkg.shared.helpers.http.error import ResourceNotFoundException, ConflictExc
 from pkg.shared.utils.async_task import AsyncTaskStatus
 
 
-def get_export_multi_query_task_status(task_id: str) -> AsyncTaskStatus[List[MultiAlignedPeptide], Exception]:
+def get_export_multi_query_task_status(task_id: str) -> AsyncTaskStatus[Any, List[MultiAlignedPeptide], Exception]:
     cached_search_task = MultiQueryAsyncTask.get_status(task_id)
     if cached_search_task is None:
         raise ResourceNotFoundException(f'Multi query search task {task_id} does not exist.')
@@ -21,7 +21,7 @@ def get_export_multi_query_task_status(task_id: str) -> AsyncTaskStatus[List[Mul
     return cached_search_task
 
 
-def create_export_multi_query_task(payload: SearchExportRequestPayload, cached_task_status: AsyncTaskStatus[List[MultiAlignedPeptide], Exception]) -> MultiQueryExportAsyncTask:
+def create_export_multi_query_task(payload: SearchExportRequestPayload, cached_task_status: AsyncTaskStatus[Any, List[MultiAlignedPeptide], Exception]) -> MultiQueryExportAsyncTask:
     task = MultiQueryExportAsyncTask(payload, cached_task_status)
     task.start()
 

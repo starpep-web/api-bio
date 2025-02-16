@@ -9,7 +9,11 @@ from pkg.shared.entity.search.single_query.model import SingleAlignmentOptions
 from pkg.shared.utils.async_task import AsyncTask, AsyncTaskStatus
 
 
-class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
+_TContext = Dict[str, Any]
+_TData = List[Dict[str, Any]]
+
+
+class SingleQueryAsyncTask(AsyncTask[_TContext, _TData, Exception]):
     TASK_NAME = 'single_query'
 
     def __init__(self, query_record: SeqIO.SeqRecord, options: SingleAlignmentOptions):
@@ -49,13 +53,13 @@ class SingleQueryAsyncTask(AsyncTask[List[Dict[str, Any]], Exception]):
 
     def post_run(self) -> None:
         parsed_result = [dataclasses.asdict(r) for r in self.result]
-        status = self.create_status(False, True, parsed_result)
+        status = self.create_status(False, True, dataclasses.asdict(self.options),  parsed_result)
         SingleQueryAsyncTask.update_status(status)
 
         print(f'Finished single query alignment task {self.task_id}')
 
     def handle_error(self, error: Exception) -> None:
-        status = self.create_status(False, False, str(error))
+        status = self.create_status(False, False, dataclasses.asdict(self.options), str(error))
         SingleQueryAsyncTask.update_status(status)
 
         print(f'Error in single query alignment task {self.task_id}')
