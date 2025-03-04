@@ -41,7 +41,7 @@ class MultiQueryExportAsyncTask(AsyncTask[_TContext, _TData, Exception]):
         if self.result:
             self.result.done.append(completed_resource)
 
-            status = self.create_status(True, False, self.result.to_dict())
+            status = self.create_status(True, False, None, self.result.to_dict())
             MultiQueryExportAsyncTask.update_status(status)
 
     def task(self) -> None:
